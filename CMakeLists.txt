@@ -11,7 +11,6 @@ project(ssTestProject)
 # ==========================================================
 # Variables 
 # ==========================================================
-set(CMAKE_FIND_DEBUG_MODE 1)
 set(ssTEST_BUILD_CHECK "ON" CACHE BOOL "Use and create static library instead")
 
 add_library(ssTest INTERFACE)
@@ -20,7 +19,9 @@ target_sources(ssTest INTERFACE
                         "${CMAKE_CURRENT_LIST_DIR}/Include/ssTest.hpp"
                         )
 
-if(CMAKE_FIND_DEBUG_MODE)
+if(ssTEST_BUILD_CHECK)
     add_executable(ssTestCheck "${CMAKE_CURRENT_LIST_DIR}/Src/ssTestCheck.cpp")
+    add_executable(ssTestExample "${CMAKE_CURRENT_LIST_DIR}/Src/ssTestExample.cpp")
     target_link_libraries(ssTestCheck PUBLIC ssTest)
+    target_link_libraries(ssTestExample PUBLIC ssTest)
 endif()

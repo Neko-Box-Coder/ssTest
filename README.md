@@ -1,5 +1,7 @@
 ## Usage
 
+Just include the header and then
+
 ```c++
 #include "ssTest.hpp"
 

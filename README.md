@@ -55,7 +55,7 @@ ssTEST("Skipping certain assertion")
     #endif
 }
 
-//ssTEST_CLEAN_UP is called beforing running any tests
+//ssTEST_CLEAN_UP is called after running all tests
 
 ssTEST_END();
 ```

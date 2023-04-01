@@ -4,52 +4,54 @@ int SomeVar = 0;    //Test variables
 
 bool SomeFunction(){return SomeVar == 1;};
 
-ssTEST_INIT();      //Initialize ssTest
-
-ssTEST_SET_UP       //(OPTIONAL) Any setup work
+int main()
 {
-    SomeVar = 1;
-}
+    ssTEST_INIT();      //Initialize ssTest
 
-ssTEST_CLEAN_UP     //(OPTIONAL) Any cleanup work
-{
-    SomeVar = -1;
-}
+    ssTEST_SET_UP       //(OPTIONAL) Any setup work
+    {
+        SomeVar = 1;
+    }
 
-//ssTEST_SET_UP is called beforing running any tests
+    ssTEST_CLEAN_UP     //(OPTIONAL) Any cleanup work
+    {
+        SomeVar = -1;
+    }
 
-ssTEST("SomeFunction Test")
-{
-    ssTEST_OUTPUT_ASSERT(SomeFunction() == true);
-}
+    //ssTEST_SET_UP and ssTEST_CLEAN_UP is called between tests
+    //Unless ssTEST_DISABLE_CLEANUP_BETWEEN_TESTS(); is called;
 
-ssTEST("Calling CleanUp and SetUp manually")
-{
-    ssTEST_CALL_CLEAN_UP();
-    ssTEST_CALL_SET_UP();
-}
+    ssTEST("SomeFunction Test")
+    {
+        ssTEST_OUTPUT_ASSERT(SomeFunction() == true);
+    }
 
-ssTEST_SKIP("Skipping A Test")
-{
-    ssTEST_OUTPUT_ASSERT(SomeFunction());
-}
+    ssTEST("Calling SetUp and cleanup manually")
+    {
+        ssTEST_CALL_SET_UP();
+        ssTEST_CALL_CLEAN_UP();
+    }
 
-ssTEST("Asserting with extra info")
-{
-    ssTEST_OUTPUT_ASSERT(true);
-    ssTEST_OUTPUT_ASSERT("Optional Info", true);
-}
-
-ssTEST("Skipping certain assertion")
-{
-    #define SKIP
-    #ifdef SKIP
-        ssTEST_OUTPUT_SKIP("Skipped");
-    #else
+    ssTEST_SKIP("Skipping A Test")
+    {
         ssTEST_OUTPUT_ASSERT(SomeFunction());
-    #endif
+    }
+
+    ssTEST("Asserting with extra info")
+    {
+        ssTEST_OUTPUT_ASSERT(true);
+        ssTEST_OUTPUT_ASSERT("Optional Info", true);
+    }
+
+    ssTEST("Skipping certain assertion")
+    {
+        #define SKIP
+        #ifdef SKIP
+            ssTEST_OUTPUT_SKIP("Skipped");
+        #else
+            ssTEST_OUTPUT_ASSERT(SomeFunction());
+        #endif
+    }
+
+    ssTEST_END();
 }
-
-//ssTEST_CLEAN_UP is called after running all tests
-
-ssTEST_END();

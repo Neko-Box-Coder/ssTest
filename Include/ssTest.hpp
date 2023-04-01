@@ -65,6 +65,9 @@
 #define ssTEST_CALL_SET_UP() ssTestSetUp()
 #define ssTEST_CALL_CLEAN_UP() ssTestCleanUp()
 
+#define ssTEST_DISABLE_CLEANUP_BETWEEN_TESTS()\
+;ssTestResetBetweenTests = false;
+
 //#define ssTEST( ... ) INTERNAL_ssTEST_VA_SELECT(ssTEST, __VA_ARGS__)
 
 #define INTERNAL_ssTEST_SETUP_INIT_IF_NEEDED()\
@@ -147,7 +150,6 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
 }
 
 #define ssTEST_INIT()\
-int main()\
 {\
     int ssTestSuccess = 0;\
     int ssTestFailed = 0;\
@@ -157,6 +159,7 @@ int main()\
     std::vector<bool> ssTestFunctionsSkipFlags;\
     int ssTestCurrentTestIndex = 0;\
     bool ssTestSetUpCalled = false;\
+    bool ssTestResetBetweenTests = true;\
     std::function<void()> ssTestSetUp = [](){};\
     std::function<void()> ssTestCleanUp = [](){};\
     try\
@@ -164,7 +167,8 @@ int main()\
         INTERNAL_ssTEST_TITLE(INTERNAL_ssTEST_FILE_NAME());
 
 #define ssTEST_END()\
-        ;ssTestSetUp();\
+        ;if(!ssTestResetBetweenTests)\
+            ssTestSetUp();\
         for(int i = 0; i < ssTestFunctions.size(); i++)\
         {\
             ssTestCurrentTestIndex = i;\
@@ -175,10 +179,17 @@ int main()\
             }\
             else\
             {\
+                if(ssTestResetBetweenTests)\
+                    ssTestSetUp();\
+                \
                 ssTestFunctions[i]();\
+                \
+                if(ssTestResetBetweenTests)\
+                    ssTestCleanUp();\
             }\
         }\
-        ssTestCleanUp();\
+        if(!ssTestResetBetweenTests)\
+            ssTestCleanUp();\
         int ssTotal = ssTestSuccess + ssTestFailed;\
         std::cout<<"\nResults:\n";\
         std::cout<<ssTestSuccess<<"/"<<ssTotal<<" tests passed\n";\

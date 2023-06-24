@@ -1088,12 +1088,12 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
         else\
             std::cout << "🧪 Running " << ssTestFunctionsNames[ssTestCurrentTestIndex] << " (" << info << "):\n";\
         \
-        bool result = false;\
+        bool ssTest_Internal_result = false;\
         {\
-            result = assert;\
+            ssTest_Internal_result = assert;\
         }\
         \
-        if(result)\
+        if(ssTest_Internal_result)\
         {\
             std::cout << termcolor::green << "Test Passed " << termcolor::reset << "✅\n\n";\
             ssTestSuccess++;\
@@ -1104,9 +1104,9 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
             ssTestFailed++;\
         }\
     }\
-    catch(std::exception& e)\
+    catch(std::exception& ssTest_except)\
     {\
-        std::cout << termcolor::red << "Error Catched: " << e.what() << "\n\n";\
+        std::cout << termcolor::red << "Error Catched: " << ssTest_except.what() << "\n\n";\
         ssTestFailed++;\
     }\
     catch(...)\
@@ -1171,9 +1171,9 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
         }\
         if(!ssTestResetBetweenTests)\
             ssTestCleanUp();\
-        int ssTotal = ssTestSuccess + ssTestFailed;\
+        int ssTestTotal = ssTestSuccess + ssTestFailed;\
         std::cout << "\nResults:\n";\
-        std::cout << ssTestSuccess << "/" << ssTotal << " tests passed\n";\
+        std::cout << ssTestSuccess << "/" << ssTestTotal << " tests passed\n";\
         if(ssTestFailed > 0)\
         {\
             std::cout << termcolor::red << ssTestName << " has failed some tests " << termcolor::reset << "😟\n\n";\

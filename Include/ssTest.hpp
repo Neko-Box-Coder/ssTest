@@ -1045,8 +1045,8 @@
     std::cout << "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄\n\n";
 #endif
 
-#define ssTEST_SET_UP ;ssTestSetUp = [&]()
-#define ssTEST_CLEAN_UP ;ssTestCleanUp = [&]()
+#define ssTEST_SET_UP ssTestSetUp = [&]()
+#define ssTEST_CLEAN_UP ssTestCleanUp = [&]()
 
 #define ssTEST_CALL_SET_UP() ssTestSetUp()
 #define ssTEST_CALL_CLEAN_UP() ssTestCleanUp()
@@ -1056,26 +1056,19 @@
 
 //#define ssTEST( ... ) INTERNAL_ssTEST_VA_SELECT(ssTEST, __VA_ARGS__)
 
-#define INTERNAL_ssTEST_SETUP_INIT_IF_NEEDED()\
-;if(!ssTestSetUpCalled)\
-{\
-    ssTestSetUp();\
-    ssTestSetUpCalled = true;\
-}\
-
 #define ssTEST(name)\
-;ssTestFunctions.resize(ssTestFunctions.size()+1);\
+ssTestFunctions.resize(ssTestFunctions.size()+1);\
 ssTestFunctionsNames.push_back(name);\
 ssTestFunctionsSkipFlags.push_back(false);\
 ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
 
 #define ssTEST_SKIP(name)\
-;ssTestFunctions.resize(ssTestFunctions.size()+1);\
+ssTestFunctions.resize(ssTestFunctions.size()+1);\
 ssTestFunctionsNames.push_back(name);\
 ssTestFunctionsSkipFlags.push_back(true);\
 ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
 
-#define ssTEST_OUTPUT_ASSERT( ... ) INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT, __VA_ARGS__ )
+#define ssTEST_OUTPUT_ASSERT( ... ) do{ INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT, __VA_ARGS__ ) } while(0)
 
 #define INTERNAL_ssTEST_OUTPUT_ASSERT_1(assert) INTERNAL_ssTEST_OUTPUT_ASSERT_2("", assert)
 
@@ -1117,7 +1110,7 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
     }\
 }
 
-#define ssTEST_OUTPUT_SKIP( ... ) INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_SKIP, __VA_ARGS__ )
+#define ssTEST_OUTPUT_SKIP( ... ) do { INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_SKIP, __VA_ARGS__ ) } while(0)
 
 #define INTERNAL_ssTEST_OUTPUT_SKIP_0() INTERNAL_ssTEST_OUTPUT_SKIP_1("")
 
@@ -1147,8 +1140,8 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
     {
 
 #define ssTEST_END()\
-        ;INTERNAL_ssTEST_TITLE(INTERNAL_ssTEST_FILE_NAME());\
-        ;if(!ssTestResetBetweenTests)\
+        INTERNAL_ssTEST_TITLE(INTERNAL_ssTEST_FILE_NAME());\
+        if(!ssTestResetBetweenTests)\
             ssTestSetUp();\
         for(int i = 0; i < ssTestFunctions.size(); i++)\
         {\

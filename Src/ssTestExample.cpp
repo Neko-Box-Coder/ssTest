@@ -11,12 +11,12 @@ int main()
     ssTEST_SET_UP       //(OPTIONAL) Any setup work
     {
         SomeVar = 1;
-    }
+    };
 
     ssTEST_CLEAN_UP     //(OPTIONAL) Any cleanup work
     {
         SomeVar = -1;
-    }
+    };
 
     //ssTEST_SET_UP and ssTEST_CLEAN_UP is called between tests
     //Unless ssTEST_DISABLE_CLEANUP_BETWEEN_TESTS(); is called;
@@ -24,24 +24,24 @@ int main()
     ssTEST("SomeFunction Test")
     {
         ssTEST_OUTPUT_ASSERT(SomeFunction() == true);
-    }
+    };
 
     ssTEST("Calling SetUp and cleanup manually")
     {
         ssTEST_CALL_SET_UP();
         ssTEST_CALL_CLEAN_UP();
-    }
+    };
 
     ssTEST_SKIP("Skipping A Test")
     {
         ssTEST_OUTPUT_ASSERT(SomeFunction());
-    }
+    };
 
     ssTEST("Asserting with extra info")
     {
         ssTEST_OUTPUT_ASSERT(true);
         ssTEST_OUTPUT_ASSERT("Optional Info", true);
-    }
+    };
 
     ssTEST("Skipping certain assertion")
     {
@@ -51,7 +51,7 @@ int main()
         #else
             ssTEST_OUTPUT_ASSERT(SomeFunction());
         #endif
-    }
+    };
 
     ssTEST_END();
 }

@@ -1180,7 +1180,7 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
             return EXIT_SUCCESS;\
         }\
     }\
-    catch(std::exception e)\
+    catch(const std::exception& e)\
     {\
         std::cout << "Exception Caught: " << e.what() << std::endl;\
         throw;\

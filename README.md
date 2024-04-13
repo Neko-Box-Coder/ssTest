@@ -5,8 +5,8 @@ Just include the header and then
 ```c++
 #include "ssTest.hpp"
 
-int SomeVar = 0;    //Test variables
-
+//Our test case
+int SomeVar = 0;
 bool SomeFunction(){return SomeVar == 1;};
 
 int main()
@@ -24,9 +24,10 @@ int main()
     };
 
     //ssTEST_SET_UP and ssTEST_CLEAN_UP is called between tests
-    //Unless ssTEST_DISABLE_CLEANUP_BETWEEN_TESTS(); is called;
+    //Unless ssTEST_DISABLE_CLEANUP_BETWEEN_TESTS(); is called, 
+    //then ssTEST_SET_UP and ssTEST_CLEAN_UP will only be called at the beginning and end of all tests
 
-    ssTEST("SomeFunction Test")
+    ssTEST("A Normal Test")
     {
         ssTEST_OUTPUT_ASSERT(SomeFunction() == true);
     };
@@ -42,6 +43,8 @@ int main()
         ssTEST_OUTPUT_ASSERT(SomeFunction());
     };
 
+    //If a test fails you can also only run that test with
+    //ssTEST_THIS_ONLY("Asserting with extra info")
     ssTEST("Asserting with extra info")
     {
         ssTEST_OUTPUT_ASSERT(true);
@@ -50,12 +53,11 @@ int main()
 
     ssTEST("Skipping certain assertion")
     {
-        #define SKIP
-        #ifdef SKIP
-            ssTEST_OUTPUT_SKIP("Skipped");
-        #else
-            ssTEST_OUTPUT_ASSERT(SomeFunction());
-        #endif
+        //Skipping certain asserts
+        ssTEST_OUTPUT_SKIP(SomeFunction(5) + 1 == 2);
+
+        //Skipping certain asserts with extra info
+        ssTEST_OUTPUT_SKIP("Not implemented yet", SomeFunction(5) + 1 == 2);
     };
 
     ssTEST_END();
@@ -63,6 +65,3 @@ int main()
 ```
 
 ![](screenshot.png)
-
-`⚠️ On Linux, you need to install an emoji font such as NotoColorEmoji.ttf in order for emoji to work`
-`⚠️ On Windows, you need to use powershell (ctrl+shift+right-click) or terminal in order to show emoji`

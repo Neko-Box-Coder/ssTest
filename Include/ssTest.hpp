@@ -999,9 +999,9 @@
 #define INTERNAL_ssTEST_SELECT( NAME, NUM ) INTERNAL_ssTEST_CAT( NAME ## _, NUM )
 #define INTERNAL_ssTEST_COMPOSE( NAME, ARGS ) NAME ARGS
 
-#define INTERNAL_ssTEST_GET_COUNT( _0, _1, _2, _3, _4, _5, _6 /* ad nauseam */, COUNT, ... ) COUNT
-#define INTERNAL_ssTEST_EXPAND() ,,,,,, // 6 commas (or 7 empty tokens)
-#define INTERNAL_ssTEST_VA_SIZE( ... ) INTERNAL_ssTEST_COMPOSE( INTERNAL_ssTEST_GET_COUNT, (INTERNAL_ssTEST_EXPAND __VA_ARGS__ (), 0, 6, 5, 4, 3, 2, 1) )
+#define INTERNAL_ssTEST_GET_COUNT( _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11 /* ad nauseam */, COUNT, ... ) COUNT
+#define INTERNAL_ssTEST_EXPAND() ,,,,,,,,,,, // 6 commas (or 7 empty tokens)
+#define INTERNAL_ssTEST_VA_SIZE( ... ) INTERNAL_ssTEST_COMPOSE( INTERNAL_ssTEST_GET_COUNT, (INTERNAL_ssTEST_EXPAND __VA_ARGS__ (), 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1) )
 
 #ifndef _MSC_VER
 #define INTERNAL_ssTEST_VA_SELECT( NAME, ... ) INTERNAL_ssTEST_SELECT( NAME, INTERNAL_ssTEST_VA_SIZE(__VA_ARGS__) )(__VA_ARGS__)
@@ -1125,12 +1125,21 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
 
 #define INTERNAL_ssTEST_OUTPUT_SKIP_0() INTERNAL_ssTEST_OUTPUT_SKIP_1("")
 
-#define INTERNAL_ssTEST_OUTPUT_SKIP_1(info)\
+#define INTERNAL_ssTEST_OUTPUT_SKIP_1(assert)\
 {\
-    if(!std::string(info).empty())\
+    std::cout << "    - Assertion Starts: " << std::endl;\
+    std::cout << "      Skipping: \"" << #assert << "\"" << std::endl;\
+    std::cout << "      " << termcolor::yellow << "Assertion Skipped ⏸︎" << termcolor::reset << std::endl << std::endl;\
+}
+
+#define INTERNAL_ssTEST_OUTPUT_SKIP_2(info, assert)\
+{\
+    if(std::string(info).empty())\
         std::cout << "    - Assertion Starts: " << std::endl;\
     else\
         std::cout << "    - Assertion Starts (" << info << "):" << std::endl;\
+    \
+    std::cout << "      Skipping: \"" << #assert << "\"" << std::endl;\
     std::cout << "      " << termcolor::yellow << "Assertion Skipped ⏸︎" << termcolor::reset << std::endl << std::endl;\
 }
 
@@ -1161,7 +1170,7 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
             std::cout << "⏵︎ Running " << ssTestFunctionsNames[ssTestCurrentTestIndex] << ":" << std::endl;\
             if(ssTestFunctionsSkipFlags[i])\
             {\
-                std::cout << termcolor::yellow << "Test Skipped ⏸︎" << termcolor::reset << std::endl << std::endl;\
+                std::cout << termcolor::yellow << "    Test Skipped ⏸︎" << termcolor::reset << std::endl << std::endl;\
                 continue;\
             }\
             else\

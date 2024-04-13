@@ -1068,6 +1068,16 @@ ssTestFunctionsNames.push_back(name);\
 ssTestFunctionsSkipFlags.push_back(true);\
 ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
 
+#define ssTEST_ONLY_THIS(name)\
+ssTestFunctions.clear(); \
+ssTestFunctionsNames.clear(); \
+ssTestFunctionsSkipFlags.clear(); \
+ssTestFunctions.resize(ssTestFunctions.size()+1);\
+ssTestFunctionsNames.push_back(name);\
+ssTestFunctionsSkipFlags.push_back(false);\
+ssTestExcludeOthers = true; \
+ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
+
 #define ssTEST_OUTPUT_ASSERT( ... ) do{ INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT, __VA_ARGS__ ) } while(0)
 
 #define INTERNAL_ssTEST_OUTPUT_ASSERT_1(assert) INTERNAL_ssTEST_OUTPUT_ASSERT_2("", assert)
@@ -1137,6 +1147,7 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
     bool ssTestResetBetweenTests = true;\
     std::function<void()> ssTestSetUp = [](){};\
     std::function<void()> ssTestCleanUp = [](){};\
+    bool ssTestExcludeOthers = false; \
     try\
     {
 
@@ -1163,6 +1174,8 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
                 if(ssTestResetBetweenTests)\
                     ssTestCleanUp();\
             }\
+            if(ssTestExcludeOthers) \
+                break; \
         }\
         if(!ssTestResetBetweenTests)\
             ssTestCleanUp();\

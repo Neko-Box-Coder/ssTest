@@ -1081,20 +1081,14 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
 #define ssTEST_OUTPUT_SETUP( setup ) \
     std::cout << "    - Setting up: " << std::endl;\
     std::cout << "      \"" << #setup << "\"" << std::endl;\
-    do \
-    { \
-        setup \
-        std::cout << std::endl; \
-    } while(0)
+    setup \
+    std::cout << std::endl
 
 #define ssTEST_OUTPUT_EXECUTION( execution ) \
     std::cout << "    - Executing: " << std::endl;\
     std::cout << "      \"" << #execution << "\"" << std::endl;\
-    do \
-    { \
-        execution \
-        std::cout << std::endl; \
-    } while(0)
+    execution \
+    std::cout << std::endl
 
 #define ssTEST_OUTPUT_ASSERT( ... ) do{ INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT, __VA_ARGS__ ) } while(0)
 

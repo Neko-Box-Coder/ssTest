@@ -1078,6 +1078,24 @@ ssTestFunctionsSkipFlags.push_back(false);\
 ssTestExcludeOthers = true; \
 ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
 
+#define ssTEST_OUTPUT_SETUP( setup ) \
+    std::cout << "    - Setting up: " << std::endl;\
+    std::cout << "      \"" << #setup << "\"" << std::endl;\
+    do \
+    { \
+        setup \
+        std::cout << std::endl; \
+    } while(0)
+
+#define ssTEST_OUTPUT_EXECUTION( execution ) \
+    std::cout << "    - Executing: " << std::endl;\
+    std::cout << "      \"" << #execution << "\"" << std::endl;\
+    do \
+    { \
+        execution \
+        std::cout << std::endl; \
+    } while(0)
+
 #define ssTEST_OUTPUT_ASSERT( ... ) do{ INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT, __VA_ARGS__ ) } while(0)
 
 #define INTERNAL_ssTEST_OUTPUT_ASSERT_1(assert) INTERNAL_ssTEST_OUTPUT_ASSERT_2("", assert)
@@ -1091,7 +1109,7 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
         else\
             std::cout << "    - Assertion Starts (" << info << "):" << std::endl;\
         \
-        std::cout << "      Executing: \"" << #assert << "\"" << std::endl;\
+        std::cout << "      Asserting: \"" << #assert << "\"" << std::endl;\
         bool ssTest_Internal_result = false;\
         {\
             ssTest_Internal_result = assert;\
@@ -1167,10 +1185,10 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
         for(int i = 0; i < ssTestFunctions.size(); i++)\
         {\
             ssTestCurrentTestIndex = i;\
-            std::cout << "⏵︎ Running " << ssTestFunctionsNames[ssTestCurrentTestIndex] << ":" << std::endl;\
+            std::cout << "⏵︎ Running \"" << ssTestFunctionsNames[ssTestCurrentTestIndex] << "\":" << std::endl;\
             if(ssTestFunctionsSkipFlags[i])\
             {\
-                std::cout << termcolor::yellow << "    Test Skipped ⏸︎" << termcolor::reset << std::endl << std::endl;\
+                std::cout << termcolor::yellow << "      --> Test Skipped ⏸︎  <--" << termcolor::reset << std::endl << std::endl;\
                 continue;\
             }\
             else\
@@ -1190,15 +1208,15 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
             ssTestCleanUp();\
         int ssTestTotal = ssTestSuccess + ssTestFailed;\
         std::cout << std::endl << "Results:" << std::endl;\
-        std::cout << ssTestSuccess << "/" << ssTestTotal << " tests passed" << std::endl;\
+        std::cout << ssTestSuccess << "/" << ssTestTotal << " assertions passed" << std::endl;\
         if(ssTestFailed > 0)\
         {\
-            std::cout << termcolor::red << ssTestName << " has failed some tests ✕" << termcolor::reset << std::endl << std::endl;\
+            std::cout << termcolor::red << ssTestName << " has failed some assertions ✕" << termcolor::reset << std::endl << std::endl;\
             return EXIT_FAILURE;\
         }\
         else\
         {\
-            std::cout << termcolor::green << ssTestName << " has passed all tests ✓" << termcolor::reset << std::endl << std::endl;\
+            std::cout << termcolor::green << ssTestName << " has passed all assertions ✓" << termcolor::reset << std::endl << std::endl;\
             return EXIT_SUCCESS;\
         }\
     }\
@@ -1209,7 +1227,7 @@ ssTestFunctions[ssTestFunctions.size() - 1] = [&]()
     }\
     catch(...)\
     {\
-        std::cout << "Unknow Exception Caught" << std::endl;\
+        std::cout << "Unknown Exception Caught" << std::endl;\
         throw;\
     }\
 }

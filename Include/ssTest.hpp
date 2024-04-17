@@ -1069,14 +1069,8 @@ ssTest_FunctionsSkipFlags.push_back(true);\
 ssTest_Functions[ssTest_Functions.size() - 1] = [&]()
 
 #define ssTEST_ONLY_THIS(name)\
-ssTest_Functions.clear(); \
-ssTest_FunctionsNames.clear(); \
-ssTest_FunctionsSkipFlags.clear(); \
-ssTest_Functions.resize(ssTest_Functions.size()+1);\
-ssTest_FunctionsNames.push_back(name);\
-ssTest_FunctionsSkipFlags.push_back(false);\
-ssTest_ExcludeOthers = true; \
-ssTest_Functions[ssTest_Functions.size() - 1] = [&]()
+ssTest_TestOnly = ssTest_Functions.size(); \
+ssTEST(name)
 
 #define ssTEST_OUTPUT_SETUP( setup ) \
     std::cout << "    - Setting up: " << std::endl;\
@@ -1170,13 +1164,13 @@ ssTest_Functions[ssTest_Functions.size() - 1] = [&]()
     bool ssTest_ResetBetweenTests = true; \
     std::function<void()> ssTest_SetUp = [](){}; \
     std::function<void()> ssTest_CleanUp = [](){}; \
-    bool ssTest_ExcludeOthers = false; \
+    int ssTest_TestOnly = -1; \
     try \
     {
 
 #define ssTEST_END()\
         INTERNAL_ssTEST_TITLE(INTERNAL_ssTEST_FILE_NAME());\
-        std::cout << "List of All " << ssTest_Functions.size() << " Tests:" << std::endl; \
+        std::cout << "List of all " << ssTest_Functions.size() << " tests:" << std::endl; \
         for(int i = 0; i < ssTest_Functions.size(); i++)\
         { \
             if(ssTest_FunctionsSkipFlags[i]) \
@@ -1188,12 +1182,21 @@ ssTest_Functions[ssTest_Functions.size() - 1] = [&]()
                 std::cout << "- \"" << ssTest_FunctionsNames[i] << "\"" << std::endl;\
         } \
         \
+        if(ssTest_TestOnly != -1) \
+        { \
+            std::cout << std::endl; \
+            std::cout << "But only running: \"" << ssTest_FunctionsNames[ssTest_TestOnly] << "\"" << std::endl; \
+        } \
+        \
         std::cout << std::endl; \
         \
         if(!ssTest_ResetBetweenTests) \
             ssTest_SetUp(); \
         for(int i = 0; i < ssTest_Functions.size(); i++) \
         {\
+            if(ssTest_TestOnly != -1 && i != ssTest_TestOnly)\
+                continue;\
+            \
             ssTest_CurrentTestIndex = i; \
             std::cout << "⏵︎ Running \"" << ssTest_FunctionsNames[ssTest_CurrentTestIndex] << "\":" << std::endl; \
             if(ssTest_FunctionsSkipFlags[i]) \
@@ -1217,14 +1220,12 @@ ssTest_Functions[ssTest_Functions.size() - 1] = [&]()
                 if(ssTest_ResetBetweenTests)\
                     ssTest_CleanUp();\
             }\
-            if(ssTest_ExcludeOthers) \
-                break; \
         }\
         if(!ssTest_ResetBetweenTests)\
             ssTest_CleanUp();\
         int ssTest_AssertTotal = ssTest_AssertSuccess + ssTest_AssertFailed;\
         std::cout << std::endl << "Results:" << std::endl;\
-        std::cout << ssTest_TestSuccess << "/" << ssTest_Functions.size() - ssTest_TestSkipped << " tests passed" << std::endl;\
+        std::cout << ssTest_TestSuccess << "/" << (ssTest_TestOnly != -1 ? 1 : ssTest_Functions.size() - ssTest_TestSkipped) << " tests passed" << std::endl;\
         std::cout << ssTest_AssertSuccess << "/" << ssTest_AssertTotal << " assertions passed" << std::endl;\
         if(ssTest_AssertFailed > 0)\
         {\

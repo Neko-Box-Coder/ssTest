@@ -1023,26 +1023,30 @@
 #define INTERNAL_ssTEST_FILE_NAME()\
 []()\
 {\
-    std::string ssTest_fileName = __FILE__;\
-    std::size_t ssTest_found = ssTest_fileName.find_last_of("/\\");\
-    std::size_t ssTest_Extfound = ssTest_fileName.rfind(".c");\
-    return ssTest_fileName.substr(ssTest_found+1, ssTest_Extfound - ssTest_found - 1);\
+    std::string ssTest_fileName = __FILE__; \
+    std::size_t ssTest_found = ssTest_fileName.find_last_of("/\\"); \
+    std::size_t ssTest_Extfound = ssTest_fileName.rfind(".c"); \
+    return ssTest_fileName.substr(ssTest_found+1, ssTest_Extfound - ssTest_found - 1); \
 }()
 
 #ifdef _WIN32
     #include <windows.h>
     #define INTERNAL_ssTEST_TITLE(title)\
-    SetConsoleOutputCP(CP_UTF8);\
-    ssTest_Name = title;\
-    std::cout << "▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀" << std::endl;\
-    std::cout << "⏷︎ " << title.c_str() << std::endl;\
-    std::cout << "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄" << std::endl << std::endl;
+    SetConsoleOutputCP(CP_UTF8); \
+    ssTest_Name = title; \
+    std::cout << "=======================================================" << std::endl; \
+    std::cout << "> " << std::endl; \
+    std::cout << "> " << title.c_str() << std::endl; \
+    std::cout << "> " << std::endl; \
+    std::cout << "=======================================================" << std::endl << std::endl;
 #else
     #define INTERNAL_ssTEST_TITLE(title)\
-    ssTest_Name = title;\
-    std::cout << "▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀" << std::endl;\
-    std::cout << "⏷︎ " << title.c_str() << std::endl;\
-    std::cout << "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄" << std::endl << std::endl;
+    ssTest_Name = title; \
+    std::cout << "=======================================================" << std::endl; \
+    std::cout << "\\" << std::endl; \
+    std::cout << " > " << title.c_str() << std::endl; \
+    std::cout << "/" << std::endl; \
+    std::cout << "=======================================================" << std::endl << std::endl;
 #endif
 
 #define ssTEST_SET_UP ssTest_SetUp = [&]()
@@ -1057,32 +1061,68 @@
 //#define ssTEST( ... ) INTERNAL_ssTEST_VA_SELECT(ssTEST, __VA_ARGS__)
 
 #define ssTEST(name)\
-ssTest_Functions.resize(ssTest_Functions.size()+1);\
-ssTest_FunctionsNames.push_back(name);\
-ssTest_FunctionsSkipFlags.push_back(false);\
+ssTest_Functions.resize(ssTest_Functions.size()+1); \
+ssTest_FunctionsNames.push_back(name); \
+ssTest_FunctionsSkipFlags.push_back(false); \
 ssTest_Functions[ssTest_Functions.size() - 1] = [&]()
 
 #define ssTEST_SKIP(name)\
-ssTest_Functions.resize(ssTest_Functions.size()+1);\
-ssTest_FunctionsNames.push_back(name);\
-ssTest_FunctionsSkipFlags.push_back(true);\
+ssTest_Functions.resize(ssTest_Functions.size()+1); \
+ssTest_FunctionsNames.push_back(name); \
+ssTest_FunctionsSkipFlags.push_back(true); \
 ssTest_Functions[ssTest_Functions.size() - 1] = [&]()
 
 #define ssTEST_ONLY_THIS(name)\
 ssTest_TestOnly = ssTest_Functions.size(); \
 ssTEST(name)
 
+#define INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE(indentation, code) \
+    { \
+        std::string ssTest_CodeStr = #code; \
+        bool ssTest_InsideCurlyBrackets = false; \
+        for(int i = 0; i < ssTest_CodeStr.size() - 1; ++i) \
+        { \
+            if(ssTest_CodeStr[i] == '{') \
+                ssTest_InsideCurlyBrackets = true; \
+            else if(ssTest_CodeStr[i] == '}') \
+                ssTest_InsideCurlyBrackets = false; \
+            \
+            if(!ssTest_InsideCurlyBrackets && ssTest_CodeStr[i] == ';') \
+                ssTest_CodeStr.insert(i + 1, "\n"); \
+        } \
+        bool ssTest_LastNewline = false; \
+        for(int i = 0; i < ssTest_CodeStr.size(); ++i) \
+        { \
+            if(ssTest_CodeStr[i] == '\n') \
+                ssTest_LastNewline = true; \
+            else if(ssTest_CodeStr[i] == ' ' && ssTest_LastNewline) \
+                ssTest_CodeStr.erase(i--, 1); \
+            else \
+                ssTest_LastNewline = false; \
+        } \
+        for(int i = 0; i < ssTest_CodeStr.size() - 1; ++i) \
+        { \
+            if(ssTest_CodeStr[i] == '\n') \
+            { \
+                ssTest_CodeStr.insert(i, "\""); \
+                ssTest_CodeStr.insert(i + 2, std::string(indentation) + "\""); \
+                ++i; \
+            } \
+        } \
+        std::cout << indentation << "\"" << ssTest_CodeStr << "\"" << std::endl; \
+    } \
+
 #define ssTEST_OUTPUT_SETUP( setup ) \
-    std::cout << "    - Setting up: " << std::endl;\
-    std::cout << "      \"" << #setup << "\"" << std::endl;\
+    std::cout << termcolor::blue << "|---- Setting up: " << termcolor::reset << std::endl; \
+    INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE("|     ", setup) \
     setup \
-    std::cout << std::endl
+    std::cout << "|" << std::endl
 
 #define ssTEST_OUTPUT_EXECUTION( execution ) \
-    std::cout << "    - Executing: " << std::endl;\
-    std::cout << "      \"" << #execution << "\"" << std::endl;\
+    std::cout << termcolor::blue << "|---- Executing: " << termcolor::reset << std::endl; \
+    INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE("|     ", execution) \
     execution \
-    std::cout << std::endl
+    std::cout << "|" << std::endl
 
 #define ssTEST_OUTPUT_ASSERT( ... ) do{ INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT, __VA_ARGS__ ) } while(0)
 
@@ -1093,37 +1133,42 @@ ssTEST(name)
     try\
     {\
         if(std::string(info).empty())\
-            std::cout << "    - Assertion Starts: " << std::endl;\
+            std::cout << termcolor::blue << "|---- Assertion Starts: " << termcolor::reset << std::endl; \
         else\
-            std::cout << "    - Assertion Starts (" << info << "):" << std::endl;\
+            std::cout << termcolor::blue << "|---- Assertion Starts (" << info << "):" << termcolor::reset << std::endl; \
         \
-        std::cout << "      Asserting: \"" << #assert << "\"" << std::endl;\
-        bool ssTest_Internal_result = false;\
+        std::cout << "|     Asserting: \"" << #assert << "\"" << std::endl; \
+        bool ssTest_Internal_result = false; \
         {\
-            ssTest_Internal_result = assert;\
+            ssTest_Internal_result = assert; \
         }\
         \
         if(ssTest_Internal_result)\
         {\
-            std::cout << "      " << termcolor::green << "Assertion Passed ✓" << termcolor::reset << std::endl << std::endl;\
-            ssTest_AssertSuccess++;\
+            std::cout <<    "|     " << termcolor::green << "Assertion Passed (O)" << \
+                            termcolor::reset << std::endl << "|" << std::endl; \
+            \
+            ssTest_AssertSuccess++; \
         }\
         else\
         {\
-            std::cout << "      " << termcolor::red << "Assertion Failed ✕" << termcolor::reset << std::endl << std::endl;\
-            ssTest_AssertFailed++;\
+            std::cout <<    "|     " << termcolor::red << "Assertion Failed (X)" << termcolor::reset << \
+                            std::endl << "|" << std::endl; \
+            ssTest_AssertFailed++; \
         }\
     }\
     catch(std::exception& ssTest_except)\
     {\
-        std::cout << "      " << termcolor::red << "Error Catched: " << ssTest_except.what() << std::endl << std::endl;\
-        ssTest_AssertFailed++;\
+        std::cout <<    "|     " << termcolor::red << "Error catched: " << ssTest_except.what() << \
+                        std::endl << "|" << std::endl; \
+        \
+        ssTest_AssertFailed++; \
     }\
     catch(...)\
     {\
-        std::cout << "      " << termcolor::red << "Error occured" << std::endl << std::endl;\
-        ssTest_AssertFailed++;\
-        throw;\
+        std::cout << "|     " << termcolor::red << "Error occurred" << std::endl << "|" << std::endl; \
+        ssTest_AssertFailed++; \
+        throw; \
     }\
 }
 
@@ -1133,20 +1178,22 @@ ssTEST(name)
 
 #define INTERNAL_ssTEST_OUTPUT_SKIP_1(assert)\
 {\
-    std::cout << "    - Assertion Starts: " << std::endl;\
-    std::cout << "      Skipping: \"" << #assert << "\"" << std::endl;\
-    std::cout << "      " << termcolor::yellow << "Assertion Skipped ⏸︎" << termcolor::reset << std::endl << std::endl;\
+    std::cout << termcolor::blue << "|---- Assertion Starts: " << termcolor::reset << std::endl; \
+    std::cout << "|     Skipping: \"" << #assert << "\"" << std::endl; \
+    std::cout <<    "|     " << termcolor::yellow << "Assertion Skipped (/)" << termcolor::reset << \
+                    std::endl << "|" << std::endl; \
 }
 
 #define INTERNAL_ssTEST_OUTPUT_SKIP_2(info, assert)\
 {\
     if(std::string(info).empty())\
-        std::cout << "    - Assertion Starts: " << std::endl;\
+        std::cout << termcolor::blue << "|---- Assertion Starts: " << termcolor::reset << std::endl; \
     else\
-        std::cout << "    - Assertion Starts (" << info << "):" << std::endl;\
+        std::cout << termcolor::blue << "|---- Assertion Starts (" << info << "):" << termcolor::reset << std::endl; \
     \
-    std::cout << "      Skipping: \"" << #assert << "\"" << std::endl;\
-    std::cout << "      " << termcolor::yellow << "Assertion Skipped ⏸︎" << termcolor::reset << std::endl << std::endl;\
+    std::cout << "|     Skipping: \"" << #assert << "\"" << std::endl; \
+    std::cout <<    "|     " << termcolor::yellow << "Assertion Skipped (/)" << termcolor::reset << \
+                    std::endl << "|" << std::endl; \
 }
 
 #define ssTEST_INIT()\
@@ -1155,11 +1202,11 @@ ssTEST(name)
     int ssTest_TestSkipped = 0; \
     int ssTest_AssertSuccess = 0; \
     int ssTest_AssertFailed = 0; \
-    std::string ssTest_Name = "";\
+    std::string ssTest_Name = ""; \
     std::vector<std::function<void()>> ssTest_Functions; \
     std::vector<std::string> ssTest_FunctionsNames; \
+    std::vector<std::string> ssTest_FailedTestsNames; \
     std::vector<bool> ssTest_FunctionsSkipFlags; \
-    int ssTest_CurrentTestIndex = 0; \
     bool ssTest_SetUpCalled = false; \
     bool ssTest_ResetBetweenTests = true; \
     std::function<void()> ssTest_SetUp = [](){}; \
@@ -1169,7 +1216,7 @@ ssTEST(name)
     {
 
 #define ssTEST_END()\
-        INTERNAL_ssTEST_TITLE(INTERNAL_ssTEST_FILE_NAME());\
+        INTERNAL_ssTEST_TITLE(INTERNAL_ssTEST_FILE_NAME()); \
         std::cout << "List of all " << ssTest_Functions.size() << " tests:" << std::endl; \
         for(int i = 0; i < ssTest_Functions.size(); i++)\
         { \
@@ -1179,7 +1226,7 @@ ssTEST(name)
                 ++ssTest_TestSkipped; \
             } \
             else \
-                std::cout << "- \"" << ssTest_FunctionsNames[i] << "\"" << std::endl;\
+                std::cout << "- \"" << ssTest_FunctionsNames[i] << "\"" << std::endl; \
         } \
         \
         if(ssTest_TestOnly != -1) \
@@ -1195,58 +1242,68 @@ ssTEST(name)
         for(int i = 0; i < ssTest_Functions.size(); i++) \
         {\
             if(ssTest_TestOnly != -1 && i != ssTest_TestOnly)\
-                continue;\
+                continue; \
             \
-            ssTest_CurrentTestIndex = i; \
-            std::cout << "⏵︎ Running \"" << ssTest_FunctionsNames[ssTest_CurrentTestIndex] << "\":" << std::endl; \
+            std::cout << std::endl << "+-------------------------------------------------------" << std::endl; \
+            std::cout <<    "| Running \"" << ssTest_FunctionsNames[i] << "\":" << std::endl; \
+            std::cout << "V-------------------------------------------------------" << std::endl; \
+            \
             if(ssTest_FunctionsSkipFlags[i]) \
             {\
-                std::cout <<    termcolor::yellow << "      --> Test Skipped ⏸︎  <--" << \
-                                termcolor::reset << std::endl << std::endl;\
+                std::cout <<    termcolor::yellow << "|---> Test Skipped <---" << \
+                                termcolor::reset << std::endl << "|" << std::endl; \
                 \
-                continue;\
+                continue; \
             }\
             else\
             {\
                 if(ssTest_ResetBetweenTests)\
-                    ssTest_SetUp();\
+                    ssTest_SetUp(); \
                 \
                 int ssTest_LastFailedCount = ssTest_AssertFailed; \
-                ssTest_Functions[i]();\
+                ssTest_Functions[i](); \
+                std::cout << "L" << std::endl; \
                 \
                 if(ssTest_LastFailedCount == ssTest_AssertFailed)\
-                    ++ssTest_TestSuccess;\
+                    ++ssTest_TestSuccess; \
+                else \
+                    ssTest_FailedTestsNames.push_back(ssTest_FunctionsNames[i]); \
                 \
                 if(ssTest_ResetBetweenTests)\
-                    ssTest_CleanUp();\
+                    ssTest_CleanUp(); \
             }\
         }\
         if(!ssTest_ResetBetweenTests)\
-            ssTest_CleanUp();\
-        int ssTest_AssertTotal = ssTest_AssertSuccess + ssTest_AssertFailed;\
-        std::cout << std::endl << "Results:" << std::endl;\
-        std::cout << ssTest_TestSuccess << "/" << (ssTest_TestOnly != -1 ? 1 : ssTest_Functions.size() - ssTest_TestSkipped) << " tests passed" << std::endl;\
-        std::cout << ssTest_AssertSuccess << "/" << ssTest_AssertTotal << " assertions passed" << std::endl;\
+            ssTest_CleanUp(); \
+        \
+        int ssTest_AssertTotal = ssTest_AssertSuccess + ssTest_AssertFailed; \
+        std::cout << std::endl << "All tests results:" << std::endl; \
+        std::cout << ssTest_TestSuccess << "/" << (ssTest_TestOnly != -1 ? 1 : ssTest_Functions.size() - ssTest_TestSkipped) << " tests passed" << std::endl; \
+        std::cout << ssTest_AssertSuccess << "/" << ssTest_AssertTotal << " assertions passed" << std::endl; \
         if(ssTest_AssertFailed > 0)\
         {\
-            std::cout << termcolor::red << ssTest_Name << " has failed some tests ✕" << termcolor::reset << std::endl << std::endl;\
-            return EXIT_FAILURE;\
+            std::cout << termcolor::red << ssTest_Name << " has failed some tests (XXX)" << termcolor::reset << std::endl; \
+            for(int i = 0; i < ssTest_FailedTestsNames.size(); i++)\
+                std::cout << termcolor::red << "- \"" << ssTest_FailedTestsNames[i] << "\" failed" << termcolor::reset << std::endl; \
+            \
+            std::cout << std::endl; \
+            return EXIT_FAILURE; \
         }\
         else\
         {\
-            std::cout << termcolor::green << ssTest_Name << " has passed all tests ✓" << termcolor::reset << std::endl << std::endl;\
-            return EXIT_SUCCESS;\
+            std::cout << termcolor::green << ssTest_Name << " has passed all tests (OOO)" << termcolor::reset << std::endl << std::endl; \
+            return EXIT_SUCCESS; \
         }\
     }\
     catch(const std::exception& e)\
     {\
-        std::cout << "Exception Caught: " << e.what() << std::endl;\
-        throw;\
+        std::cout << "Exception Caught: " << e.what() << std::endl; \
+        throw; \
     }\
     catch(...)\
     {\
-        std::cout << "Unknown Exception Caught" << std::endl;\
-        throw;\
+        std::cout << "Unknown Exception Caught" << std::endl; \
+        throw; \
     }\
 }
 

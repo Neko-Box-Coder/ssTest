@@ -561,6 +561,7 @@ int ssTestOutputExecution_ShouldNotOutput_WhenOutputDisabled()
     ssTEST_END_TEST_GROUP();
 }
 
+//TODO: Add tests for exceptions
 
 int main()
 {

@@ -1196,7 +1196,7 @@
             if(ssTest_OutputAsserts) \
             { \
                 ssCOUT <<    termcolor::green << "|     Assertion Passed (" << \
-                            (ssTest_RunningOptional ? "+" : "O" ) << ")" << termcolor::reset; \
+                            (ssTest_RunningOptional ? "+" : "O") << ")" << termcolor::reset; \
                 \
                 INTERNAL_ssTEST_OUTPUT_OPTIONAL_TEXT(); \
                 std::cout << std::endl; \
@@ -1210,7 +1210,7 @@
             if(true) \
             { \
                 ssCOUT <<   termcolor::red << "|     Assertion Failed (" << \
-                            (ssTest_RunningOptional ? "-" : "X" ) << ")" << termcolor::reset; \
+                            (ssTest_RunningOptional ? "-" : "X") << ")" << termcolor::reset; \
                 \
                 INTERNAL_ssTEST_OUTPUT_OPTIONAL_TEXT(); \
                 std::cout << std::endl; \
@@ -1227,8 +1227,8 @@
         ssCOUT <<   termcolor::red << "|     Trying to run " << assertExpression << \
                     termcolor::reset << std::endl; \
         \
-        ssCOUT <<   termcolor::red << "|     Error Caught:" << ssTest_except.what() << \
-                    termcolor::reset; \
+        ssCOUT <<   termcolor::red << "|     Error Caught (" << (ssTest_RunningOptional ? "-" : "X") <<  \
+                    "):" << ssTest_except.what() << termcolor::reset; \
         \
         INTERNAL_ssTEST_OUTPUT_OPTIONAL_TEXT(); \
         ssCOUT << std::endl; \
@@ -1241,7 +1241,9 @@
         ssCOUT <<   termcolor::red << "|     Trying to run " << assertExpression << \
                     termcolor::reset << std::endl; \
         \
-        ssCOUT << termcolor::red << "|     Error Occurred" << termcolor::reset; \
+        ssCOUT <<   termcolor::red << "|     Error Caught (" << (ssTest_RunningOptional ? "-" : "X") << \
+                    ")" << termcolor::reset; \
+        \
         INTERNAL_ssTEST_OUTPUT_OPTIONAL_TEXT(); \
         \
         if(ssTest_RunningOptional) \
@@ -1630,12 +1632,12 @@
     }\
     catch(const std::exception& e)\
     {\
-        ssCOUT << "Exception Caught: " << e.what() << std::endl; \
+        ssCOUT << "Error Caught (XXX): " << e.what() << std::endl; \
         throw; \
     }\
     catch(...)\
     {\
-        ssCOUT << "Unknown Exception Caught" << std::endl; \
+        ssCOUT << "Unknown Error Caught (XXX)" << std::endl; \
         throw; \
     }\
 }

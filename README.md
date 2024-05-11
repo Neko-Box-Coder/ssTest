@@ -184,10 +184,10 @@ If the assert fails however, it will still output associated line that failed th
 
 ### 🧪 Test
 
-- `ssTEST("testName"){...};`: Creates a test with `testName`
-- `ssTEST_ONLY_THIS("testName"){...};`: Creates a test with `testName` and only runs this test, 
+- `ssTEST("testName"){statement_1; statement_2; ...};`: Creates a test with `testName`
+- `ssTEST_ONLY_THIS("testName"){statement_1; statement_2; ...};`: Creates a test with `testName` and only runs this test, 
 great when debugging a single test.
-- `ssTEST_SKIP("testName"){...};`: Creates a test with `testName` and skips it
+- `ssTEST_SKIP("testName"){statement_1; statement_2; ...};`: Creates a test with `testName` and skips it
 
 Example:
 
@@ -226,17 +226,17 @@ equal and output result with `info`.
 and `expectedValue` returns true when compared with the `operator` and output result with `info`.
 
 #### Optional Assertions
-- `ssTEST_OUTPUT_OPTIONAL_ASSERT(...);`: Execution the assertions with arguments same as "Required Assertions"
+- `ssTEST_OUTPUT_OPTIONAL_ASSERT(...);`: Execute the assertions with arguments same as "Required Assertions"
 but failure of the assertion will **not** fail the test.
 
-#### Skipping Assertions
-- `ssTEST_OUTPUT_SKIP_ASSERT(...)`: **Skip** the assertion with arguments same as "Required Assertions".
-
 #### Test Setup and Execution
->❗️ If using macro inside these action fails to compile, simple wrap them in a parenthesis instead.
+- `ssTEST_OUTPUT_SETUP(statement_1; statement_2; ...);`: Executes and output the setup statements.
+- `ssTEST_OUTPUT_EXECUTION(statement_1; statement_2; ...);`: Executes and output the execution statements.
 
-- `ssTEST_OUTPUT_SETUP(...);`: Executes and output the setup statements.
-- `ssTEST_OUTPUT_EXECUTION(...);`: Executes and output the execution **statement(s)**.
+#### Skipping Actions
+- `ssTEST_OUTPUT_SKIP_ASSERT(...)`: **Skips** the assertion with arguments same as "Required Assertions".
+- `ssTEST_OUTPUT_SKIP_SETUP(statement_1; statement_2; ...);`: **Skips** the test setup action.
+- `ssTEST_OUTPUT_SKIP_EXECUTION(statement_1; statement_2; ...);`: **Skips** the test execution.
 
 #### Outputting Values (Up to 5 values) When An Assertion Failed
 - `ssTEST_OUTPUT_VALUES_WHEN_FAILED(comma, separated, values,...);`: Output the values of the variables when the assertion failed.
@@ -244,6 +244,169 @@ but failure of the assertion will **not** fail the test.
 #### Calling Common Setup And Cleanup Manually (Advanced)
 - `ssTEST_CALL_COMMON_SETUP();`: Calls the common setup function manually
 - `ssTEST_CALL_COMMON_CLEANUP();`: Calls the common cleanup function manually
+
+### 📝 Complete Example
+
+Let's say I have a C memory allocator:
+
+```c
+//An Example Class To Test
+typedef struct
+{
+    int PageSize;
+    int PageCount;
+    short* AllocateID_Table;
+    int NextAllocateID;
+    char* Memory;
+} MyMemoryAllocator;
+
+MyMemoryAllocator MyMemoryAllocator_Create(size_t pageSize, size_t pageCount);
+bool MyMemoryAllocator_Destroy(MyMemoryAllocator* allocator);
+void* MyMemoryAllocator_Allocate(MyMemoryAllocator* allocator, size_t size);
+bool MyMemoryAllocator_Free(MyMemoryAllocator* allocator, void* memory);
+
+```
+
+My test file could look like this:
+
+```c++
+int main()
+{
+    MyMemoryAllocator testAllocator;
+    
+    ssTEST_INIT_TEST_GROUP();
+
+    ssTEST_COMMON_SET_UP
+    {
+        testAllocator = MyMemoryAllocator_Create(64, 12);
+    };
+
+    ssTEST_COMMON_CLEAN_UP
+    {
+        MyMemoryAllocator_Destroy(&testAllocator);
+    };
+
+    ssTEST("MyMemoryAllocator_Create Should Not Crash When Requesting Zero Memory")
+    {
+        //We want to create our own memory allocator and request empty memory
+        ssTEST_CALL_COMMON_CLEANUP();
+        
+        ssTEST_OUTPUT_EXECUTION
+        (
+            testAllocator = MyMemoryAllocator_Create(64, 0);
+        );
+        
+        ssTEST_OUTPUT_ASSERT(testAllocator.PageSize == 64);
+        ssTEST_OUTPUT_ASSERT(testAllocator.PageCount == 0);
+    };
+    
+    ssTEST("MyMemoryAllocator_CreateShared Should Create Shared Memory Allocator")
+    {
+        ssTEST_OUTPUT_SETUP
+        (
+            const int pageSize = 64;
+            const int pageCount = 4;
+            MyMemoryAllocator sharedAllocator;
+            void* sharedMemory = MyMemoryAllocator_Allocate(&testAllocator, 
+                                                            pageSize * pageCount + 
+                                                            pageCount * sizeof(short));
+        );
+        
+        ssTEST_OUTPUT_EXECUTION
+        (
+            sharedAllocator = MyMemoryAllocator_CreateShared(sharedMemory, pageSize, pageCount);
+        );
+        
+        ssTEST_OUTPUT_ASSERT(sharedAllocator.AllocateID_Table == (short*)sharedMemory);
+        ssTEST_OUTPUT_ASSERT(sharedAllocator.Memory == (char*)sharedMemory + pageCount * sizeof(short));
+        ssTEST_OUTPUT_ASSERT(sharedAllocator.PageSize == pageSize);
+        ssTEST_OUTPUT_ASSERT(sharedAllocator.PageCount == pageCount);
+        
+        MyMemoryAllocator_Destroy(&sharedAllocator);
+    };
+
+    ssTEST("MyMemoryAllocator_Allocate Should Allocate Memory When Enough Memory Is Available")
+    {
+        ssTEST_OUTPUT_SETUP
+        (
+            const int pageSize = 64;
+            char* memory;
+            int pageCount = 4;
+        );
+        
+        for(int i = 0; i < 2; i++)
+        {
+            ssTEST_OUTPUT_EXECUTION
+            (
+                memory = (char*)MyMemoryAllocator_Allocate(&testAllocator, pageSize * pageCount);
+            );
+        }
+        
+        ssTEST_OUTPUT_EXECUTION
+        (
+            *memory = 17;
+            *(memory + pageSize * pageCount - 1) = 17;
+        );
+        
+        //This also works without a message as well
+        ssTEST_OUTPUT_ASSERT("Memory Result", memory != NULL);
+        
+        //Asserting by passing two values (to compare equality) will also print the values
+        ssTEST_OUTPUT_ASSERT("Reading to beginning of memory", *memory == 17);
+        
+        //You can also specify the operator to use for comparison
+        ssTEST_OUTPUT_ASSERT(   "Reading to end of memory", 
+                                *(memory + pageSize * pageCount - 1), 17, ==);
+    };
+    
+    ssTEST("MyMemoryAllocator_Allocate Should Return NULL When Not Enough Memory Is Available")
+    {
+        ssTEST_OUTPUT_SETUP
+        (
+            const int pageSize = 64;
+        );
+        
+        //Let's say this is not implemented or we know it is crashing, we can skip the assert 
+        //or even skip the whole test with ssTEST_SKIP
+        ssTEST_OUTPUT_SKIP_ASSERT(  "Allocation Result", 
+                                    (char*)MyMemoryAllocator_Allocate(  &testAllocator, 
+                                                                        pageSize * 250) == NULL);
+    };
+    
+    ssTEST("MyMemoryAllocator_Allocate Should Return NULL When Zero Size Is Passed In")
+    {
+        ssTEST_OUTPUT_SETUP
+        (
+            char* memory;
+        );
+        (void)memory;
+        
+        ssTEST_OUTPUT_EXECUTION
+        (
+            memory = (char*)MyMemoryAllocator_Allocate(&testAllocator, 0);
+        );
+        
+        //Let's say there's a bug in the allocator which will probably fail the assert, 
+        //but we still want to know the result. An optional assert can be used in this case.
+        ssTEST_OUTPUT_OPTIONAL_ASSERT("Allocation Result", memory == NULL);
+    };
+
+    //etc...
+
+    ssTEST_END_TEST_GROUP();
+}
+```
+
+For full example, see `Src/ssTestExample.cpp`
+
+Here are some screenshots of the output of the tests
+
+![](./ListOfTests.png)
+![](./SimpleTest.png)
+![](./ComplexTest.png)
+![](./SkipAsserts.png)
+![](./OptionalAsserts.png)
+
 
 ### 📊 Tests And Assert Results
 
@@ -279,5 +442,3 @@ Or in powershell
 ```powershell
 Select-String -path .\testResult.txt -Pattern "\(X\)" -Context 15,0
 ```
-
-### 📝 Example

@@ -1013,6 +1013,24 @@
 #define INTERNAL_ssTEST_VA_SELECT( NAME, ... ) INTERNAL_ssTEST_VA_ARGS_FIX(INTERNAL_ssTEST_SELECT, ( NAME, INTERNAL_ssTEST_VA_SIZE( __VA_ARGS__ ) )) (__VA_ARGS__)
 #endif
 
+#define INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS( ... ) \
+    INTERNAL_ssTEST_COMPOSE \
+    ( \
+        INTERNAL_ssTEST_GET_COUNT, \
+        ( \
+            INTERNAL_ssTEST_EXPAND __VA_ARGS__ (), \
+            INTERNAL_ssTEST_EMPTY, INTERNAL_ssTEST_NOT_EMPTY, INTERNAL_ssTEST_NOT_EMPTY, INTERNAL_ssTEST_NOT_EMPTY, \
+            INTERNAL_ssTEST_NOT_EMPTY, INTERNAL_ssTEST_NOT_EMPTY, INTERNAL_ssTEST_NOT_EMPTY, INTERNAL_ssTEST_NOT_EMPTY, \
+            INTERNAL_ssTEST_NOT_EMPTY, INTERNAL_ssTEST_NOT_EMPTY, INTERNAL_ssTEST_NOT_EMPTY, INTERNAL_ssTEST_NOT_EMPTY \
+        ) \
+    )(__VA_ARGS__)
+
+#define INTERNAL_ssTEST_EMPTY()
+
+#define INTERNAL_ssTEST_NOT_EMPTY(...) , __VA_ARGS__
+
+#define INTERNAL_ssTEST_DELAY_STRINGIFY(x) INTERNAL_ssTEST_COMPOSE(INTERNAL_ssTEST_STRINGIFY, (x))
+#define INTERNAL_ssTEST_STRINGIFY(x) #x
 
 #include <string>
 #include <functional>
@@ -1103,9 +1121,25 @@
     ssTest_TestOnly = ssTest_Functions.size(); \
     ssTEST(name)
 
+//TODO: Move the content of this to a function maybe
 #define INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE(indentation, code) \
     { \
-        std::string ssTest_CodeStr = #code; \
+        std::string ssTest_CodeStr = INTERNAL_ssTEST_DELAY_STRINGIFY(code); \
+        ssTest_CodeStr = ssTest_CodeStr.substr(1, ssTest_CodeStr.size() - 2); \
+        for(int i = 0; i < ssTest_CodeStr.size(); ++i) \
+        { \
+            if(ssTest_CodeStr[i] == ' ' || ssTest_CodeStr[i] == '\t') \
+                ssTest_CodeStr.erase(i--, 1); \
+            else \
+                break; \
+        } \
+        for(int i = ssTest_CodeStr.size() - 1; i >= 0; --i) \
+        { \
+            if(ssTest_CodeStr[i] == ' ' || ssTest_CodeStr[i] == '\t') \
+                ssTest_CodeStr.erase(i, 1); \
+            else \
+                break; \
+        } \
         bool ssTest_InsideCurlyBrackets = false; \
         for(int i = 0; i < ssTest_CodeStr.size() - 1; ++i) \
         { \
@@ -1136,31 +1170,49 @@
                 ++i; \
             } \
         } \
-        ssCOUT <<   indentation << "\"" << ssTest_CodeStr << "\" on line " << __LINE__ << \
+        std::cout <<   indentation << "\"" << ssTest_CodeStr << "\" on line " << __LINE__ << \
                     " in " << ssTest_FileName << ssTest_FileExt << std::endl; \
     }
 
 #define ssTEST_DISABLE_OUTPUT_SETUP() ssTest_OutputSetups = false
 
-#define ssTEST_OUTPUT_SETUP( setup ) \
+#define ssTEST_OUTPUT_SETUP( setup, ... ) \
     if(ssTest_OutputSetups) \
     { \
         ssCOUT << termcolor::blue << "|---- Setting up: " << termcolor::reset << std::endl; \
-        INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE("|     ", setup) \
+        INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE(ssTest_Indent + "|     ", (setup INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS(__VA_ARGS__))) \
     } \
-    setup \
+    setup INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS(__VA_ARGS__) \
+    if(ssTest_OutputSetups) \
+        ssCOUT << "|" << std::endl
+
+#define ssTEST_OUTPUT_SKIP_SETUP( setup, ... ) \
+    if(ssTest_OutputSetups) \
+    { \
+        ssCOUT << termcolor::yellow << "|---- Skip setting up: " << termcolor::reset << std::endl; \
+        INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE(ssTest_Indent + "|     ", (setup INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS(__VA_ARGS__))) \
+    } \
     if(ssTest_OutputSetups) \
         ssCOUT << "|" << std::endl
 
 #define ssTEST_DISABLE_OUTPUT_EXECUTION() ssTest_OutputExecutions = false;
 
-#define ssTEST_OUTPUT_EXECUTION( execution ) \
+#define ssTEST_OUTPUT_EXECUTION( execution, ... ) \
     if(ssTest_OutputExecutions) \
     { \
         ssCOUT << termcolor::blue << "|---- Executing: " << termcolor::reset << std::endl; \
-        INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE("|     ", execution) \
+        INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE(ssTest_Indent + "|     ", (execution INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS(__VA_ARGS__))) \
     } \
-    execution \
+    execution INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS(__VA_ARGS__) \
+    if(ssTest_OutputExecutions) \
+        ssCOUT << "|" << std::endl
+
+#define ssTEST_OUTPUT_SKIP_EXECUTION( execution, ... ) \
+    if(ssTest_OutputExecutions) \
+    { \
+        ssCOUT << termcolor::yellow << "|---- Skip executing: " << termcolor::reset << std::endl; \
+        INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE(ssTest_Indent + "|     ", (execution INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS(__VA_ARGS__))) \
+    } \
     if(ssTest_OutputExecutions) \
         ssCOUT << "|" << std::endl
 

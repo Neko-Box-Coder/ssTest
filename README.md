@@ -9,6 +9,49 @@ The last thing you want is to spend so much time trying to figure out how to imp
 
 Just include `ssTest.hpp` into your project
 
+## 🏃 Quick Start
+Here is a quick example of what ssTest looks like in a simple example. 
+Many other features are covered in 📖 [Documentations](#documentations)
+
+```cpp
+int AddOne(int input) { return input + 1; }
+
+int main()
+{
+    int testVar = 0;
+    
+    //Name of test group is optional
+    ssTEST_INIT_TEST_GROUP("ssTest Quick Start");
+    
+    ssTEST_COMMON_SET_UP(){ testVar = 1;};
+    
+    ssTEST("testVar Should Be Initialized By Common Setup")
+    {
+        ssTEST_OUTPUT_ASSERT(testVar == 1);
+    };
+    
+    ssTEST("Setup And Execution Example")
+    {
+        //ssTEST_OUTPUT_SETUP is optional
+        ssTEST_OUTPUT_SETUP
+        (
+            int testVar2 = 10;
+        );
+        
+        //ssTEST_OUTPUT_EXECUTION is optional
+        ssTEST_OUTPUT_EXECUTION
+        (
+            testVar = AddOne(testVar2);
+        );
+        
+        ssTEST_OUTPUT_ASSERT(testVar == testVar2 + 1);
+    };
+
+    ssTEST_END_TEST_GROUP();
+}
+
+```
+
 ## 📖 Documentations
 
 ### 😶‍🌫️ Concepts

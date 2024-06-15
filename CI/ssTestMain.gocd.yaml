@@ -217,7 +217,7 @@ pipelines:
                                 -   /s
                                 -   /v
                                 -   /c
-                                -   .\SendGithubStatus "%CI_GITHUB_PAT%" "failure" "%GO_PIPELINE_NAME%"
+                                -   .\SendGithubStatus.bat "%CI_GITHUB_PAT%" "failure" "%GO_PIPELINE_NAME%"
                                     "%GO_PIPELINE_COUNTER%" "%GO_STAGE_NAME%" "%GO_STAGE_COUNTER%" "%GO_JOB_NAME%"
                                 command: cmd
                                 working_directory: ssTest
@@ -352,7 +352,7 @@ pipelines:
                                 -   /s
                                 -   /v
                                 -   /c
-                                -   .\SendGithubStatus "%CI_GITHUB_PAT%" "failure"
+                                -   .\SendGithubStatus.bat "%CI_GITHUB_PAT%" "failure"
                                     "%GO_PIPELINE_NAME%" "%GO_PIPELINE_COUNTER%" "%GO_STAGE_NAME%"
                                     "%GO_STAGE_COUNTER%" "%GO_JOB_NAME%"
                                 command: cmd

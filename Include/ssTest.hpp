@@ -1096,8 +1096,12 @@
         INTERNAL_ssTEST_COMMON_TITLE();
 #endif
 
-#define ssTEST_COMMON_SET_UP ssTest_SetUp = [&]()
-#define ssTEST_COMMON_CLEAN_UP ssTest_CleanUp = [&]()
+//ssTEST_COMMON_SETUP and ssTEST_COMMON_CLEANUP replaces ssTEST_COMMON_SET_UP and ssTEST_COMMON_CLEAN_UP
+#define ssTEST_COMMON_SETUP ssTest_SetUp = [&]()
+#define ssTEST_COMMON_CLEANUP ssTest_CleanUp = [&]()
+
+#define ssTEST_COMMON_SET_UP _Pragma("message( \"ssTEST_COMMON_SET_UP is deprecated, use ssTEST_COMMON_SETUP instead\" )") ssTEST_COMMON_SETUP
+#define ssTEST_COMMON_CLEAN_UP _Pragma("message( \"ssTEST_COMMON_CLEAN_UP is deprecated, use ssTEST_COMMON_CLEANUP instead\" )") ssTEST_COMMON_CLEANUP
 
 #define ssTEST_CALL_COMMON_SETUP() ssTest_SetUp()
 #define ssTEST_CALL_COMMON_CLEANUP() ssTest_CleanUp()

@@ -143,12 +143,12 @@ int main()
     
     ssTEST_INIT_TEST_GROUP();
 
-    ssTEST_COMMON_SET_UP
+    ssTEST_COMMON_SETUP
     {
         testAllocator = MyMemoryAllocator_Create(64, 12);
     };
 
-    ssTEST_COMMON_CLEAN_UP
+    ssTEST_COMMON_CLEANUP
     {
         MyMemoryAllocator_Destroy(&testAllocator);
     };

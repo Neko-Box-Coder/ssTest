@@ -23,7 +23,7 @@ int main()
     //Name of test group is optional
     ssTEST_INIT_TEST_GROUP("ssTest Quick Start");
     
-    ssTEST_COMMON_SET_UP(){ testVar = 1;};
+    ssTEST_COMMON_SETUP(){ testVar = 1;};
     
     ssTEST("testVar Should Be Initialized By Common Setup")
     {
@@ -105,8 +105,8 @@ Test groups are also nestable so you can have a hierarchy of tests.
 
 </details>
 
-Each test in a test group can optionally share a **common setup** (`ssTEST_COMMON_SET_UP()`) and 
-a **common cleanup** function (`ssTEST_COMMON_CLEAN_UP()`).
+Each test in a test group can optionally share a **common setup** (`ssTEST_COMMON_SETUP()`) and 
+a **common cleanup** function (`ssTEST_COMMON_CLEANUP()`).
 
 ### 📂 Test Group
 
@@ -124,8 +124,8 @@ but you can do any other way you see fit.
 #### Common Setup And Cleanup
 > These should be called before declaring the first test (`ssTEST()`) in the test group
 
-- `ssTEST_COMMON_SET_UP(){...};`: A common setup function that is called before each test in the test group
-- `ssTEST_COMMON_CLEAN_UP(){...};`: A common cleanup function that is called after each test in the test group
+- `ssTEST_COMMON_SETUP(){...};`: A common setup function that is called before each test in the test group
+- `ssTEST_COMMON_CLEANUP(){...};`: A common cleanup function that is called after each test in the test group
 - `ssTEST_DISABLE_COMMON_SETUP_CLEANUP_BETWEEN_TESTS();`: Disable calling the common setup and cleanup functions **between** tests. 
 But still be called at the beginning and end of the test group.
 
@@ -142,8 +142,8 @@ int main()
     
     ssTEST_INIT_TEST_GROUP();
     
-    ssTEST_COMMON_SET_UP(){ testVar = 1;};
-    ssTEST_COMMON_CLEAN_UP(){ cleanUpCount++; };
+    ssTEST_COMMON_SETUP(){ testVar = 1;};
+    ssTEST_COMMON_CLEANUP(){ cleanUpCount++; };
     //ssTEST_DISABLE_COMMON_SETUP_CLEANUP_BETWEEN_TESTS();
     
     ssTEST("A Normal Test")
@@ -319,12 +319,12 @@ int main()
     
     ssTEST_INIT_TEST_GROUP();
 
-    ssTEST_COMMON_SET_UP
+    ssTEST_COMMON_SETUP
     {
         testAllocator = MyMemoryAllocator_Create(64, 12);
     };
 
-    ssTEST_COMMON_CLEAN_UP
+    ssTEST_COMMON_CLEANUP
     {
         MyMemoryAllocator_Destroy(&testAllocator);
     };

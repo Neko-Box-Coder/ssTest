@@ -79,7 +79,7 @@ int ssTestCommonSetUp_ShouldBeCalled_WhenEachTestStarts()
     ssTEST_INIT_TEST_GROUP(__func__);
     
     int someVar = 0;
-    ssTEST_COMMON_SET_UP
+    ssTEST_COMMON_SETUP
     {
         someVar = 1;
     };
@@ -103,7 +103,7 @@ int ssTestCommonSetup_ShouldBeCalled_WhenCalledManually()
     ssTEST_INIT_TEST_GROUP(__func__);
     
     int someVar = 0;
-    ssTEST_COMMON_SET_UP
+    ssTEST_COMMON_SETUP
     {
         someVar = 1;
     };
@@ -125,7 +125,7 @@ int ssTestCommonCleanUp_ShouldBeCalled_WhenEachTestEnds()
     ssTEST_INIT_TEST_GROUP(__func__);
     
     int someVar = 0;
-    ssTEST_COMMON_CLEAN_UP
+    ssTEST_COMMON_CLEANUP
     {
         someVar = -1;
     };
@@ -154,7 +154,7 @@ int ssTestCommonCleanup_ShouldBeCalled_WhenCalledManually()
     ssTEST_INIT_TEST_GROUP(__func__);
     
     int someVar = 0;
-    ssTEST_COMMON_CLEAN_UP
+    ssTEST_COMMON_CLEANUP
     {
         someVar = -1;
     };
@@ -177,12 +177,12 @@ int ssTestCommonSetupCleanup_ShouldNotBeCalled_WhenDisabledBetweenTests()
     ssTEST_DISABLE_COMMON_SETUP_CLEANUP_BETWEEN_TESTS();
     
     int someVar = 0;
-    ssTEST_COMMON_SET_UP
+    ssTEST_COMMON_SETUP
     {
         someVar = 1;
     };
     
-    ssTEST_COMMON_CLEAN_UP
+    ssTEST_COMMON_CLEANUP
     {
         someVar = -1;
     };
@@ -252,7 +252,7 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
         if(disableOutput)
             ssTEST_DISABLE_OUTPUT_ASSERT();
     
-        ssTEST_COMMON_SET_UP
+        ssTEST_COMMON_SETUP
         {
             someVar = 0;
         };
@@ -279,7 +279,7 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
         if(disableOutput)
             ssTEST_DISABLE_OUTPUT_ASSERT();
     
-        ssTEST_COMMON_SET_UP
+        ssTEST_COMMON_SETUP
         {
             someVar = 0;
         };
@@ -306,7 +306,7 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
         if(disableOutput)
             ssTEST_DISABLE_OUTPUT_ASSERT();
     
-        ssTEST_COMMON_SET_UP
+        ssTEST_COMMON_SETUP
         {
             someVar = 0;
         };
@@ -333,7 +333,7 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
         if(disableOutput)
             ssTEST_DISABLE_OUTPUT_ASSERT();
     
-        ssTEST_COMMON_SET_UP
+        ssTEST_COMMON_SETUP
         {
             someVar = 0;
         };

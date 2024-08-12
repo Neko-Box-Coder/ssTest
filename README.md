@@ -23,7 +23,10 @@ int main()
     //Name of test group is optional
     ssTEST_INIT_TEST_GROUP("ssTest Quick Start");
     
-    ssTEST_COMMON_SETUP(){ testVar = 1;};
+    ssTEST_COMMON_SETUP
+    {
+        testVar = 1;
+    };
     
     ssTEST("testVar Should Be Initialized By Common Setup")
     {
@@ -142,8 +145,8 @@ int main()
     
     ssTEST_INIT_TEST_GROUP();
     
-    ssTEST_COMMON_SETUP(){ testVar = 1;};
-    ssTEST_COMMON_CLEANUP(){ cleanUpCount++; };
+    ssTEST_COMMON_SETUP{ testVar = 1;};
+    ssTEST_COMMON_CLEANUP{ cleanUpCount++; };
     //ssTEST_DISABLE_COMMON_SETUP_CLEANUP_BETWEEN_TESTS();
     
     ssTEST("A Normal Test")

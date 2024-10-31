@@ -1200,14 +1200,14 @@ namespace Internal_ssTest
     {
         std::string ssTestCodeStr = code;
         ssTestCodeStr = ssTestCodeStr.substr(1, ssTestCodeStr.size() - 2);
-        for(int i = 0; i < ssTestCodeStr.size(); ++i)
+        for(size_t i = 0; i < ssTestCodeStr.size(); ++i)
         {
             if(ssTestCodeStr[i] == ' ' || ssTestCodeStr[i] == '\t')
                 ssTestCodeStr.erase(i--, 1);
             else
                 break;
         }
-        for(int i = ssTestCodeStr.size() - 1; i >= 0; --i)
+        for(int i = static_cast<int>(ssTestCodeStr.size() - 1); i >= 0; --i)
         {
             if(ssTestCodeStr[i] == ' ' || ssTestCodeStr[i] == '\t')
                 ssTestCodeStr.erase(i, 1);
@@ -1215,7 +1215,7 @@ namespace Internal_ssTest
                 break;
         }
         bool ssTestInsideCurlyBrackets = false;
-        for(int i = 0; i < ssTestCodeStr.size() - 1; ++i)
+        for(size_t i = 0; i < ssTestCodeStr.size() - 1; ++i)
         { \
             if(ssTestCodeStr[i] == '{')
                 ssTestInsideCurlyBrackets = true;
@@ -1226,7 +1226,7 @@ namespace Internal_ssTest
                 ssTestCodeStr.insert(i + 1, "\n");
         }
         bool ssTestLastNewline = false;
-        for(int i = 0; i < ssTestCodeStr.size(); ++i)
+        for(size_t i = 0; i < ssTestCodeStr.size(); ++i)
         {
             if(ssTestCodeStr[i] == '\n')
                 ssTestLastNewline = true;
@@ -1235,7 +1235,7 @@ namespace Internal_ssTest
             else
                 ssTestLastNewline = false;
         }
-        for(int i = 0; i < ssTestCodeStr.size() - 1; ++i)
+        for(size_t i = 0; i < ssTestCodeStr.size() - 1; ++i)
         {
             if(ssTestCodeStr[i] == '\n')
             {
@@ -1517,7 +1517,7 @@ namespace Internal_ssTest
         ssCOUT << std::endl;
 
         ssCOUT << "List of all " << ssTest_Status.ssTest_Functions.size() << " tests:" << std::endl;
-        for(int i = 0; i < ssTest_Status.ssTest_Functions.size(); i++)
+        for(size_t i = 0; i < ssTest_Status.ssTest_Functions.size(); i++)
         {
             if(ssTest_Status.ssTest_FunctionsSkipFlags.at(i))
             {
@@ -1539,7 +1539,7 @@ namespace Internal_ssTest
 
         if(!ssTest_Status.ssTest_ResetBetweenTests)
             ssTest_Status.ssTest_SetUp();
-        for(int i = 0; i < ssTest_Status.ssTest_Functions.size(); i++)
+        for(size_t i = 0; i < ssTest_Status.ssTest_Functions.size(); i++)
         {
             if(ssTest_Status.ssTest_TestOnly != -1 && i != ssTest_Status.ssTest_TestOnly)
                 continue;
@@ -1603,7 +1603,7 @@ namespace Internal_ssTest
             ssCOUT <<   termcolor::red << ssTest_Status.ssTest_Name << " group has failed some tests (XXX)" <<
                         termcolor::reset << std::endl;
 
-            for(int i = 0; i < ssTest_Status.ssTest_FailedTestsNames.size(); i++)
+            for(size_t i = 0; i < ssTest_Status.ssTest_FailedTestsNames.size(); i++)
             {
                 ssCOUT <<   termcolor::red << "- \"" << ssTest_Status.ssTest_FailedTestsNames.at(i) <<
                             "\" failed" << termcolor::reset << std::endl;

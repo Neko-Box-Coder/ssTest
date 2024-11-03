@@ -1237,18 +1237,21 @@ namespace Internal_ssTest
                 lastNewline = false;
             }
             
+            const bool isSpace = code[i] == ' ' && !inString;
+            const bool isSymbol = strchr(symbols, code[i]) && !inString;
+            const bool isEndString = code[i] == '"' && inString;
+            const bool isNewline = code[i] == '\n';
+            const bool isLastChar = i == code.size() - 1;
+            
+            //Append end quote for string
+            if(isEndString)
+                currentOutput += '"';
+            
             //Space, newline, symbols, end of string or end of code, output
-            if( (code[i] == ' ' && !inString) || 
-                (strchr(symbols, code[i]) && !inString) ||
-                (code[i] == '"' && inString) ||
-                code[i] == '\n' || 
-                i == code.size() - 1)
+            if(isSpace || isSymbol || isEndString || isNewline || isLastChar)
             {
-                //Append end quote for string
-                if(code[i] == '"' && inString)
-                    currentOutput += '"';
                 //Handle last character
-                else if(i == code.size() - 1)
+                if(isLastChar && !isSpace && !isSymbol && !isEndString && !isNewline)
                     currentOutput += code.back();
                 
                 //Check if currentOutput is a keyword
@@ -1285,13 +1288,15 @@ namespace Internal_ssTest
                         std::cout << currentOutput << termcolor::reset;
                 }
                 
-                //Check symbols
+                //Output current symbols
                 if(strchr(symbols, code[i]))
+                {
                     std::cout << termcolor::magenta << code[i] << termcolor::reset;
-                
-                //Special case to remove type state when encouter (
-                if(code[i] == '(')
-                    isType = false;
+                    
+                    //Special case to remove type state when encouter (
+                    if(code[i] == '(')
+                        isType = false;
+                }
                 
                 //Output the space or newline
                 if(code[i] == ' ')

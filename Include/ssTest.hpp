@@ -1033,6 +1033,7 @@
 #define INTERNAL_ssTEST_STRINGIFY(x) #x
 
 #include <string>
+#include <cstring>
 #include <functional>
 #include <iostream>
 #include <vector>
@@ -1040,7 +1041,10 @@
 #define ssCOUT std::cout << ssTest_Status.ssTest_Indent
 
 #define INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE(indentation, code) \
-    Internal_ssTest::OutputFormattedCode(indentation, INTERNAL_ssTEST_DELAY_STRINGIFY(code), __LINE__)
+    Internal_ssTest::ProcessAndOutputFormattedCode( indentation, \
+                                                    INTERNAL_ssTEST_DELAY_STRINGIFY(code), \
+                                                    __LINE__, \
+                                                    __FILE__)
 
 #define INTERNAL_ssTEST_OUTPUT_OPTIONAL_TEXT() \
     if(ssTest_Status.ssTest_RunningOptional) std::cout << termcolor::yellow << " (Optional) " << termcolor::reset
@@ -1196,10 +1200,140 @@ namespace Internal_ssTest
         return ssTestfileName.substr(ssTestExtfound, ssTestfileName.size() - ssTestExtfound);
     }
     
-    inline void OutputFormattedCode(std::string indentation, std::string code, int line)
+    inline void OutputFormattedCode(const std::string& indentation, 
+                                    const std::string& code,
+                                    const bool typeHighlight)
+    {
+        //Keywords to highlight
+        const std::vector<std::string> keywords = {
+            "include", 
+            "if", "else", "for", "while", "do", "switch", "case", "break",
+            "continue", "return", "true", "false", "nullptr", "new", "delete", "using",
+            "try", "throw", "this",
+            
+            "class", "struct", "enum", "union", "template", "typename", "namespace",
+            
+            "public", "private", "protected", "virtual", "static", "const",
+            
+            "void", "int", "bool", "char", "float", "double", "auto", 
+            
+            "size_t", "uint8_t", "uint16_t", "uint32_t", "uint64_t", 
+            "int8_t", "int16_t", "int32_t", "int64_t", "char_t", "wchar_t",
+            
+            "std", "shared_ptr", "vector", "string"
+        };
+        const char* symbols = "+-*/%=<>()!&|^~?:";
+
+        std::string currentOutput;
+        bool inString = false;
+        bool inNumber = false;
+        bool isType = true;
+        bool lastNewline = true;
+        for(size_t i = 0; i < code.size(); ++i)
+        {
+            if(lastNewline)
+            {
+                std::cout << indentation;
+                lastNewline = false;
+            }
+            
+            //Space, newline, symbols, end of string or end of code, output
+            if( (code[i] == ' ' && !inString) || 
+                (strchr(symbols, code[i]) && !inString) ||
+                (code[i] == '"' && inString) ||
+                code[i] == '\n' || 
+                i == code.size() - 1)
+            {
+                //Append end quote for string
+                if(code[i] == '"' && inString)
+                    currentOutput += '"';
+                //Handle last character
+                else if(i == code.size() - 1)
+                    currentOutput += code.back();
+                
+                //Check if currentOutput is a keyword
+                bool isKeyword = false;
+                for(const std::string& keyword : keywords)
+                {
+                    if(currentOutput == keyword)
+                    {
+                        std::cout << termcolor::blue << currentOutput << termcolor::reset;
+                        isKeyword = true;
+                        break;
+                    }
+                }
+                
+                //If not a keyword, check string and number
+                if(!isKeyword)
+                {
+                    if(inString)
+                    {
+                        std::cout << termcolor::green << currentOutput << termcolor::reset;
+                        if(currentOutput.empty())
+                            inString = false;
+                        else if(currentOutput.back() == '"')
+                            inString = false;
+                    }
+                    else if(inNumber || (currentOutput.size() == 1 && isdigit(currentOutput.front())))
+                    {
+                        std::cout << termcolor::yellow << currentOutput << termcolor::reset;
+                        inNumber = false;
+                    }
+                    else if(isType && typeHighlight)
+                        std::cout << termcolor::cyan << currentOutput << termcolor::reset;
+                    else
+                        std::cout << currentOutput << termcolor::reset;
+                }
+                
+                //Check symbols
+                if(strchr(symbols, code[i]))
+                    std::cout << termcolor::magenta << code[i] << termcolor::reset;
+                
+                //Special case to remove type state when encouter (
+                if(code[i] == '(')
+                    isType = false;
+                
+                //Output the space or newline
+                if(code[i] == ' ')
+                {
+                    std::cout << " ";
+                    isType = false;
+                }
+                else if(code[i] == '\n')
+                {
+                    std::cout << std::endl;
+                    lastNewline = true;
+                    inString = false;
+                    inNumber = false;
+                    isType = true;
+                }
+                
+                currentOutput.clear();
+            }
+            else
+            {
+                //Start of string
+                if(code[i] == '"' && !inString)
+                    inString = true;
+                
+                //Start of number
+                if(isdigit(code[i]) && currentOutput.empty() && !inString)
+                    inNumber = true;
+                
+                currentOutput += code[i];
+            }
+        }
+    }
+    
+    inline void ProcessAndOutputFormattedCode(  const std::string& indentation, 
+                                                const std::string& code, 
+                                                int line, 
+                                                const std::string& file)
     {
         std::string ssTestCodeStr = code;
         ssTestCodeStr = ssTestCodeStr.substr(1, ssTestCodeStr.size() - 2);
+        
+        //Trim beginning of string
         for(size_t i = 0; i < ssTestCodeStr.size(); ++i)
         {
             if(ssTestCodeStr[i] == ' ' || ssTestCodeStr[i] == '\t')
@@ -1207,6 +1341,8 @@ namespace Internal_ssTest
             else
                 break;
         }
+        
+        //Trim end of string
         for(int i = static_cast<int>(ssTestCodeStr.size() - 1); i >= 0; --i)
         {
             if(ssTestCodeStr[i] == ' ' || ssTestCodeStr[i] == '\t')
@@ -1214,6 +1350,8 @@ namespace Internal_ssTest
             else
                 break;
         }
+        
+        //Add newlines for each statement, excluding codes in curly brackets
         bool ssTestInsideCurlyBrackets = false;
         for(size_t i = 0; i < ssTestCodeStr.size() - 1; ++i)
         { \
@@ -1225,28 +1363,68 @@ namespace Internal_ssTest
             if(!ssTestInsideCurlyBrackets && ssTestCodeStr[i] == ';')
                 ssTestCodeStr.insert(i + 1, "\n");
         }
-        bool ssTestLastNewline = false;
-        for(size_t i = 0; i < ssTestCodeStr.size(); ++i)
+        
+        //Removing spaces after newlines
         {
-            if(ssTestCodeStr[i] == '\n')
-                ssTestLastNewline = true;
-            else if(ssTestCodeStr[i] == ' ' && ssTestLastNewline)
-                ssTestCodeStr.erase(i--, 1);
-            else
-                ssTestLastNewline = false;
-        }
-        for(size_t i = 0; i < ssTestCodeStr.size() - 1; ++i)
-        {
-            if(ssTestCodeStr[i] == '\n')
+            bool ssTestLastNewline = false;
+            for(size_t i = 0; i < ssTestCodeStr.size(); ++i)
             {
-                ssTestCodeStr.insert(i, "\"");
-                ssTestCodeStr.insert(i + 2, std::string(indentation) + "\"");
-                ++i;
+                if(ssTestCodeStr[i] == '\n')
+                    ssTestLastNewline = true;
+                else if(ssTestCodeStr[i] == ' ' && ssTestLastNewline)
+                    ssTestCodeStr.erase(i--, 1);
+                else
+                    ssTestLastNewline = false;
             }
         }
-        std::cout <<   indentation << "\"" << ssTestCodeStr << "\" on line " << line <<
-                    " in " << Internal_ssTest::GetFileName(__FILE__) << 
-                    Internal_ssTest::GetFileExt(__FILE__) << std::endl;
+        
+        //Split long line into multiple lines by '.', "->"
+        {
+            const size_t MAX_LINE_LENGTH = 35; //Maximum characters per line
+            size_t currentLineLength = 0;
+            bool insideString = false;
+
+            for(size_t i = 0; i < ssTestCodeStr.size(); ++i) 
+            {
+                //Track if we're inside a string literal
+                if(ssTestCodeStr[i] == '"') 
+                    insideString = !insideString;
+
+                //Don't split inside strings
+                if(!insideString && currentLineLength > MAX_LINE_LENGTH)
+                {
+                    if( ssTestCodeStr[i] == '.' ||
+                        (
+                            ssTestCodeStr[i] == '-' && 
+                            i < ssTestCodeStr.size() - 1 && 
+                            ssTestCodeStr[i + 1] == '>'
+                        ))
+                    {
+                        ssTestCodeStr.insert(i, "\n    ");
+                    }
+                }
+
+                //Reset line length on existing newlines
+                if(ssTestCodeStr[i] == '\n') 
+                    currentLineLength = 0;
+                else
+                    ++currentLineLength;
+            }
+        }
+        
+        //Output codeblock
+        std::cout << indentation << "```" << std::endl;
+        
+        //Output formatted code to console
+        OutputFormattedCode(indentation, ssTestCodeStr, true);
+        
+        //Output codeblock
+        std::cout << std::endl << indentation << "```" << std::endl;
+        
+        //Outputting info
+        std::cout <<    indentation << "on line " << line << " in " << 
+                        Internal_ssTest::GetFileName(file) << 
+                        Internal_ssTest::GetFileExt(file) << std::endl;
     }
     
     struct TestStatus
@@ -1395,9 +1573,10 @@ namespace Internal_ssTest
             if(ssTest_Status.ssTest_OutputAsserts)
             {
                 INTERNAL_ssTEST_OUTPUT_ASSERT_STARTS(info);
-                ssCOUT <<   "|     Asserting: \"" << assertExpression << "\" on line " <<
-                            line << " in " << ssTest_Status.ssTest_FileName << 
-                            ssTest_Status.ssTest_FileExt << std::endl;
+                ssCOUT <<   "|     Asserting: ";
+                OutputFormattedCode("", assertExpression, false);
+                std::cout << " on line " << line << " in " << ssTest_Status.ssTest_FileName << 
+                ssTest_Status.ssTest_FileExt << std::endl;
             }
 
             bool ssTestInternalResult = false;
@@ -1406,12 +1585,14 @@ namespace Internal_ssTest
 
             if(!ssTestInternalResult)
             {
-                ssCOUT <<   termcolor::red << "|     Assertion Failed For Expression: \"" << assertExpression;
+                ssCOUT <<   termcolor::red << "|     Assertion Failed For Expression: " << 
+                            assertExpression;
+                
                 if(ssTest_Status.ssTest_OutputAsserts)
-                    std::cout << "\"" << termcolor::reset << std::endl;
+                    std::cout << termcolor::reset << std::endl;
                 else
                 {
-                    std::cout <<    "\" on line " << line << " in " << ssTest_Status.ssTest_FileName <<
+                    std::cout <<    " on line " << line << " in " << ssTest_Status.ssTest_FileName <<
                                     ssTest_Status.ssTest_FileExt << termcolor::reset << std::endl;
                 }
             }
@@ -1437,8 +1618,11 @@ namespace Internal_ssTest
             if(ssTest_Status.ssTest_OutputAsserts)
             {
                 INTERNAL_ssTEST_OUTPUT_ASSERT_STARTS(info);
-                ssCOUT <<   "|     Asserting: \"" << assertValuePrint << " " << operatorValuePrint << " " <<
-                            expectedValuePrint << "\" on line " << line << " in " << ssTest_Status.ssTest_FileName <<
+                ssCOUT <<   "|     Asserting: ";
+                OutputFormattedCode("", assertValuePrint, false);
+                std::cout << " " << operatorValuePrint << " ";
+                OutputFormattedCode("", expectedValuePrint, false);
+                std::cout << " on line " << line << " in " << ssTest_Status.ssTest_FileName <<
                             ssTest_Status.ssTest_FileExt << std::endl;
             }
 
@@ -1449,14 +1633,16 @@ namespace Internal_ssTest
 
                 if(!ssTestInternalResult)
                 {
-                    ssCOUT <<   termcolor::red << "|     Assertion Failed For Expression: \"" <<
-                                assertValuePrint << " " << operatorValuePrint << " " << expectedValuePrint;
-
+                    ssCOUT <<   termcolor::red << "|     Assertion Failed For Expression: ";
+                    OutputFormattedCode("", assertValuePrint, false);
+                    std::cout << " " << operatorValuePrint << " ";
+                    OutputFormattedCode("", expectedValuePrint, false);
+                    
                     if(ssTest_Status.ssTest_OutputAsserts)
-                        std::cout << "\"" << termcolor::reset << std::endl;
+                        std::cout << termcolor::reset << std::endl;
                     else
                     {
-                        std::cout << "\" on line " << line << " in " << ssTest_Status.ssTest_FileName <<
+                        std::cout << " on line " << line << " in " << ssTest_Status.ssTest_FileName <<
                         ssTest_Status.ssTest_FileExt << termcolor::reset << std::endl;
                     }
 
@@ -1489,8 +1675,11 @@ namespace Internal_ssTest
                         termcolor::reset << std::endl;
         }
 
-        ssCOUT <<   "|     Skipping: \"" << assertExpression << "\" on line " << line << " in " <<
-                    ssTest_Status.ssTest_FileName << ssTest_Status.ssTest_FileExt << std::endl; \
+        ssCOUT <<   "|     Skipping: "; 
+        OutputFormattedCode("", assertExpression, false);
+        
+        std::cout <<    " on line " << line << " in " << ssTest_Status.ssTest_FileName << 
+                        ssTest_Status.ssTest_FileExt << std::endl;
 
         ssCOUT <<   "|     " << termcolor::yellow << "Assertion Skipped (/)" << termcolor::reset <<
                     std::endl;
@@ -1541,7 +1730,7 @@ namespace Internal_ssTest
             ssTest_Status.ssTest_SetUp();
         for(size_t i = 0; i < ssTest_Status.ssTest_Functions.size(); i++)
         {
-            if(ssTest_Status.ssTest_TestOnly != -1 && i != ssTest_Status.ssTest_TestOnly)
+            if(ssTest_Status.ssTest_TestOnly != -1 && static_cast<int>(i) != ssTest_Status.ssTest_TestOnly)
                 continue;
 
             ssCOUT << std::endl;

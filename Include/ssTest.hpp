@@ -1529,10 +1529,10 @@ namespace Internal_ssTest
         
         ssCOUT <<   termcolor::red << "|     Error Caught (" << 
                     (ssTest_Status.ssTest_RunningOptional ? "-" : "X") << 
-                    "):" << ssTestExcept.what() << termcolor::reset;
+                    "): " << ssTestExcept.what() << termcolor::reset;
         
         INTERNAL_ssTEST_OUTPUT_OPTIONAL_TEXT(); 
-        ssCOUT << std::endl; 
+        std::cout << std::endl; 
         ssCOUT << "|" << std::endl; 
         
         ssTest_Status.ssTest_AssertFailed++;
@@ -1549,21 +1549,22 @@ namespace Internal_ssTest
                     ")" << termcolor::reset;
 
         INTERNAL_ssTEST_OUTPUT_OPTIONAL_TEXT(); 
+        std::cout << std::endl;
 
         if(ssTest_Status.ssTest_RunningOptional)
         {
             ssCOUT <<   termcolor::yellow <<
                         "|     Continuing even with unknown error for optional asserts" <<
-                        termcolor::reset;
+                        termcolor::reset << std::endl;
 
             ssTest_Status.ssTest_OptionalFailed++;
         }
         else
         {
-            ssCOUT << termcolor::red << "|     Re-throwing unknown error..." << termcolor::reset;
+            ssCOUT <<   termcolor::red << "|     Re-throwing unknown error..." << 
+                        termcolor::reset << std::endl;
             throw;
         }
-        ssCOUT << std::endl;
         ssCOUT << "|" << std::endl;
     }
     

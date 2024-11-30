@@ -1679,7 +1679,8 @@ namespace Internal_ssTest
                 INTERNAL_ssTEST_OUTPUT_ASSERT_STARTS(info);
                 INTERN_INDENTED_COUT <<   "|     Asserting: ";
                 OutputFormattedCode("", assertValuePrint, false);
-                std::cout << " " << operatorValuePrint << " ";
+                std::cout <<    " " << INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CMAGENTA << 
+                                operatorValuePrint << " " << INTERN_ssTEST_CEND;
                 OutputFormattedCode("", expectedValuePrint, false);
                 std::cout << " on line " << line << " in " << ssTest_Status.ssTest_FileName <<
                             ssTest_Status.ssTest_FileExt << std::endl;

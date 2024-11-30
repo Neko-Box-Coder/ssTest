@@ -137,11 +137,13 @@ bool MyMemoryAllocator_Free(MyMemoryAllocator* allocator, void* memory)
     return true;
 }
 
-int main()
+int main(int argc, char** argv)
 {
     MyMemoryAllocator testAllocator;
     
     ssTEST_INIT_TEST_GROUP();
+    
+    ssTEST_PARSE_ARGS(argc, argv);
 
     ssTEST_COMMON_SETUP
     {

@@ -1041,6 +1041,7 @@
 #include <functional>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #define INTERN_INDENTED_COUT std::cout << ssTest_Status.ssTest_Indent
 
@@ -1497,7 +1498,9 @@ namespace Internal_ssTest
         bool ssTest_RunningOptional = false;
         std::function<void()> ssTest_SetUp = [](){};
         std::function<void()> ssTest_CleanUp = [](){};
-        int ssTest_TestOnly = -1;
+        std::string ssTest_TestOnly = "";  //Empty means run all tests
+        std::vector<std::string> ssTest_SkipTestNames;
+        bool ssTest_ListOnly = false;
     };
     
     inline void OutputOptionalText(Internal_ssTest::TestStatus& ssTest_Status)
@@ -1777,30 +1780,63 @@ namespace Internal_ssTest
         INTERN_INDENTED_COUT << "List of all " << ssTest_Status.ssTest_Functions.size() << " tests:" << std::endl;
         for(size_t i = 0; i < ssTest_Status.ssTest_Functions.size(); i++)
         {
+            //Process skip tests
+            if(std::find(   ssTest_Status.ssTest_SkipTestNames.begin(),
+                            ssTest_Status.ssTest_SkipTestNames.end(),
+                            ssTest_Status.ssTest_FunctionsNames.at(i)) != ssTest_Status.ssTest_SkipTestNames.end())
+            {
+                ssTest_Status.ssTest_FunctionsSkipFlags.at(i) = true;
+            }
+
             if(ssTest_Status.ssTest_FunctionsSkipFlags.at(i))
             {
-                INTERN_INDENTED_COUT << "- (Skipped) \"" << ssTest_Status.ssTest_FunctionsNames.at(i) << "\"" <<
-                std::endl;
+                INTERN_INDENTED_COUT << "- " << INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CYELLOW << 
+                                        "(Skipped) \"" << ssTest_Status.ssTest_FunctionsNames.at(i) << "\"" <<
+                                        INTERN_ssTEST_CEND << std::endl;
                 ++ssTest_Status.ssTest_TestSkipped;
             }
             else
                 INTERN_INDENTED_COUT << "- \"" << ssTest_Status.ssTest_FunctionsNames.at(i) << "\"" << std::endl;
         }
 
-        if(ssTest_Status.ssTest_TestOnly != -1)
+        //Exit if only listing tests
+        if(ssTest_Status.ssTest_ListOnly)
         {
             INTERN_INDENTED_COUT << std::endl;
-            INTERN_INDENTED_COUT << "But only running: \"" <<
-                ssTest_Status.ssTest_FunctionsNames.at(ssTest_Status.ssTest_TestOnly) << "\"" <<
-                std::endl;
+            return 0;
+        }
+
+        if(!ssTest_Status.ssTest_TestOnly.empty())
+        {
+            bool found = false;
+            for(const std::string& name : ssTest_Status.ssTest_FunctionsNames)
+            {
+                if(name == ssTest_Status.ssTest_TestOnly)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found)
+            {
+                INTERN_INDENTED_COUT << "Error: Test \"" << ssTest_Status.ssTest_TestOnly << "\" not found" << std::endl;
+                return 1;
+            }
+            
+            INTERN_INDENTED_COUT << std::endl;
+            INTERN_INDENTED_COUT << "But only running: \"" << ssTest_Status.ssTest_TestOnly << "\"" <<
+                                    std::endl;
         }
 
         if(!ssTest_Status.ssTest_ResetBetweenTests)
             ssTest_Status.ssTest_SetUp();
         for(size_t i = 0; i < ssTest_Status.ssTest_Functions.size(); i++)
         {
-            if(ssTest_Status.ssTest_TestOnly != -1 && static_cast<int>(i) != ssTest_Status.ssTest_TestOnly)
+            if( !ssTest_Status.ssTest_TestOnly.empty() && 
+                ssTest_Status.ssTest_FunctionsNames[i] != ssTest_Status.ssTest_TestOnly)
+            {
                 continue;
+            }
 
             INTERN_INDENTED_COUT << std::endl;
             INTERN_INDENTED_COUT << "+-------------------------------------------------------" << std::endl;
@@ -1843,9 +1879,11 @@ namespace Internal_ssTest
         int ssTestOptionalAssertTotal = ssTest_Status.ssTest_OptionalSuccess + ssTest_Status.ssTest_OptionalFailed;
         INTERN_INDENTED_COUT << std::endl;
         INTERN_INDENTED_COUT << "All tests results:" << std::endl;
-        INTERN_INDENTED_COUT <<   ssTest_Status.ssTest_TestSuccess << "/" << (ssTest_Status.ssTest_TestOnly != -1 ?
-                    1 :
-                    ssTest_Status.ssTest_Functions.size() - ssTest_Status.ssTest_TestSkipped) << " tests passed" << std::endl;
+        INTERN_INDENTED_COUT <<     ssTest_Status.ssTest_TestSuccess << "/" << 
+                                    (!ssTest_Status.ssTest_TestOnly.empty() ?
+                                        1 :
+                                        ssTest_Status.ssTest_Functions.size() - ssTest_Status.ssTest_TestSkipped) << 
+                                    " tests passed" << std::endl;
 
         INTERN_INDENTED_COUT << ssTest_Status.ssTest_AssertSuccess << "/" << ssTestAssertTotal << " assertions passed" << std::endl;
 
@@ -1913,7 +1951,7 @@ namespace Internal_ssTest
     ssTest_Status.ssTest_Functions[ssTest_Status.ssTest_Functions.size() - 1] = [&]()
 
 #define ssTEST_ONLY_THIS(name)\
-    ssTest_Status.ssTest_TestOnly = ssTest_Status.ssTest_Functions.size(); \
+    ssTest_Status.ssTest_TestOnly = name; \
     ssTEST(name)
 
 #define ssTEST_DISABLE_OUTPUT_SETUP() ssTest_Status.ssTest_OutputSetups = false
@@ -1963,6 +2001,63 @@ namespace Internal_ssTest
         INTERN_INDENTED_COUT << "|" << std::endl
 
 #define ssTEST_DISABLE_OUTPUT_ASSERT() ssTest_Status.ssTest_OutputAsserts = false;
+
+#define ssTEST_PARSE_ARGS(parseArgc, parseArgv) \
+    do \
+    { \
+        for(int i = 1; i < parseArgc; ++i) \
+        { \
+            const std::string arg = parseArgv[i]; \
+            if(arg == "--help") \
+            { \
+                std::cout << "ssTest command line options:" << std::endl; \
+                std::cout << "  --no-setup-output      Disable setup output" << std::endl; \
+                std::cout << "  --no-execution-output  Disable execution output" << std::endl; \
+                std::cout << "  --no-assert-output     Disable assert output" << std::endl; \
+                std::cout << "  --test-only <name>     Only run the specified test" << std::endl; \
+                std::cout << "  --skip-test <name>     Skip the specified test" << std::endl; \
+                std::cout << "  --list-only            Only list available tests" << std::endl; \
+                std::cout << "  --min-output           Only show the minimum output" << std::endl; \
+                std::cout << "  --assert-output        Only show assertion output" << std::endl; \
+                std::cout << "  --help                 Show this help message" << std::endl; \
+                return 0; \
+            } \
+            else if(arg == "--list-only") \
+                ssTest_Status.ssTest_ListOnly = true; \
+            else if(arg == "--no-setup-output") \
+                ssTest_Status.ssTest_OutputSetups = false; \
+            else if(arg == "--no-execution-output") \
+                ssTest_Status.ssTest_OutputExecutions = false; \
+            else if(arg == "--no-assert-output") \
+                ssTest_Status.ssTest_OutputAsserts = false; \
+            else if(arg == "--test-only" && i + 1 < parseArgc) \
+            { \
+                ssTest_Status.ssTest_TestOnly = parseArgv[++i]; \
+            } \
+            else if(arg == "--skip-test" && i + 1 < parseArgc) \
+            { \
+                ssTest_Status.ssTest_SkipTestNames.push_back(parseArgv[++i]); \
+            } \
+            else if(arg == "--min-output") \
+            { \
+                ssTest_Status.ssTest_OutputSetups = false; \
+                ssTest_Status.ssTest_OutputExecutions = false; \
+                ssTest_Status.ssTest_OutputAsserts = false; \
+            } \
+            else if(arg == "--assert-output") \
+            { \
+                ssTest_Status.ssTest_OutputSetups = false; \
+                ssTest_Status.ssTest_OutputExecutions = false; \
+            } \
+            else \
+            { \
+                std::cerr << "Error: Unknown option \"" << arg << "\"" << std::endl; \
+                std::cerr << "Use --help to see available options" << std::endl; \
+                return 1; \
+            } \
+        } \
+    } while(0)
+
 
 #define ssTEST_OUTPUT_VALUES_WHEN_FAILED( ... ) \
     do \

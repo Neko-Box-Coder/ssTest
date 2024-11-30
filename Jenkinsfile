@@ -227,6 +227,12 @@ pipeline
                         bash "ls -lah ./Build"
                         bash "chmod +x ./Build/ssTestExample"
                         bash "cd ./Build && ./ssTestExample"
+                        
+                        bash "cd ./Build && ./ssTestExample --assert-output"
+                        bash "cd ./Build && ./ssTestExample --test-only \"MyMemoryAllocator_CreateShared Should Create Shared Memory Allocator\""
+                        bash "cd ./Build && ./ssTestExample --skip-test \"MyMemoryAllocator_CreateShared Should Create Shared Memory Allocator\""
+                        bash "cd ./Build && ./ssTestExample --min-output"
+                        
                         bash "chmod +x ./Build/ssTestCheck"
                         bash "cd ./Build && ./ssTestCheck"
                         bash "chmod +x ./Build/ssTestCheckColored"
@@ -246,6 +252,12 @@ pipeline
                         bat 'dir'
                         bat 'dir .\\Build\\Debug'
                         bat 'cd .\\Build\\Debug && .\\ssTestExample.exe'
+                        
+                        bat 'cd .\\Build\\Debug && .\\ssTestExample.exe --assert-output'
+                        bat 'cd .\\Build\\Debug && .\\ssTestExample.exe --test-only \"MyMemoryAllocator_CreateShared Should Create Shared Memory Allocator\"'
+                        bat 'cd .\\Build\\Debug && .\\ssTestExample.exe --skip-test \"MyMemoryAllocator_CreateShared Should Create Shared Memory Allocator\"'
+                        bat 'cd .\\Build\\Debug && .\\ssTestExample.exe --min-output'
+                        
                         bat 'cd .\\Build\\Debug && .\\ssTestCheck.exe'
                         bat 'cd .\\Build\\Debug && .\\ssTestCheckColored.exe'
                     }

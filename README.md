@@ -446,6 +446,41 @@ int main()
 
 For full example, see `Src/ssTestExample.cpp`
 
+### 🎯 Command Line Arguments
+
+ssTest can be controlled through command line arguments. To enable this, pass the program arguments to `ssTEST_PARSE_ARGS`:
+
+```cpp
+int main(int argc, char* argv[])
+{
+    ssTEST_INIT_TEST_GROUP();
+    ssTEST_PARSE_ARGS(argc, argv);
+    
+    ssTEST("My Test")
+    {
+        //...
+    };
+    
+    ssTEST_END_TEST_GROUP();
+}
+```
+
+Available options:
+
+```
+--help                   Show help message
+--no-setup-output        Disable setup output
+--no-execution-output    Disable execution output
+--no-assert-output       Disable assert output
+--test-only <name>       Only run the specified test
+--skip-test <name>       Skip the specified test
+--list-only              Only list available tests
+--min-output             Only show the minimum output
+--assert-output          Only show assertion output
+```
+
+Note: `ssTEST_PARSE_ARGS` must be called after `ssTEST_INIT_TEST_GROUP` but before defining any tests.
+
 Here are some screenshots of the output of the tests
 
 ![](./ListOfTests.png)

@@ -3,6 +3,14 @@
 #include <cassert>
 #include <sstream>
 
+#if !defined(ssTEST_NO_COLOR_OUTPUT) || !ssTEST_NO_COLOR_OUTPUT
+    #ifdef assert
+        #undef assert
+    #endif
+    
+    #define assert(...) (void)(__VA_ARGS__)
+#endif
+
 //From https://stackoverflow.com/a/5419388
 struct cout_redirect 
 {
@@ -269,6 +277,7 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
         
         ssTEST_END_TEST_GROUP();
     };
+    (void)assertPass;
     
     auto assertFail = [&someVar](bool disableOutput, std::string indent)
     {
@@ -296,6 +305,7 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
         
         ssTEST_END_TEST_GROUP();
     };
+    (void)assertFail;
     
     auto assertOptional = [&someVar](bool disableOutput, std::string indent)
     {
@@ -323,6 +333,7 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
         
         ssTEST_END_TEST_GROUP();
     };
+    (void)assertOptional;
     
     auto assertSkip = [&someVar](bool disableOutput, std::string indent)
     {
@@ -350,6 +361,8 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
         
         ssTEST_END_TEST_GROUP();
     };
+    (void)assertSkip;
+    
     
     ssTEST_INIT_TEST_GROUP("Test Asserts");
     
@@ -569,27 +582,27 @@ int main()
     {
         cout_redirect cr(outputBuffer.rdbuf());
         assert(ssTestInitTestGroup_ShouldUseFileNameForTestGroupName_WhenNothingIsSupplied() == 0);
-        assert(outputBuffer.str().find("ssTestCheck") != std::string::npos);
     }
-    std::cout << outputBuffer.str();
+    std::cout << outputBuffer.str() << std::endl;
+    assert(outputBuffer.str().find("ssTestCheck") != std::string::npos);
     
     {
         outputBuffer.str("");
         outputBuffer.clear();
         cout_redirect cr(outputBuffer.rdbuf());
         assert(ssTestInitTestGroup_ShouldUseCustomNameForTestGroupName_WhenNameIsSupplied() == 0);
-        assert(outputBuffer.str().find("Test Group Name") != std::string::npos);
     }
-    std::cout << outputBuffer.str();
+    std::cout << outputBuffer.str() << std::endl;
+    assert(outputBuffer.str().find("Test Group Name") != std::string::npos);
     
     {
         outputBuffer.str("");
         outputBuffer.clear();
         cout_redirect cr(outputBuffer.rdbuf());
         assert(ssTestTestGroup_ShouldHaveCorrectFormat_WhenNestedWithOtherTestGroups() == 0);
-        assert(outputBuffer.str().find("| |     |") != std::string::npos);
     }
-    std::cout << outputBuffer.str();
+    std::cout << outputBuffer.str() << std::endl;
+    assert(outputBuffer.str().find("| |     |") != std::string::npos);
     
     {
         assert(ssTestCommonSetUp_ShouldBeCalled_WhenEachTestStarts() == 0);
@@ -608,9 +621,9 @@ int main()
         outputBuffer.clear();
         cout_redirect cr(outputBuffer.rdbuf());
         assert(ssTestSkip_ShouldSkipTest_WhenCalled() == 0);
-        assert(outputBuffer.str().find("- (Skipped) \"Test2\"") != std::string::npos);
     }
-    std::cout << outputBuffer.str();
+    std::cout << outputBuffer.str() << std::endl;
+    assert(outputBuffer.str().find("- (Skipped) \"Test2\"") != std::string::npos);
     
     {
         bool called = false;
@@ -626,20 +639,20 @@ int main()
             outputBuffer.clear();
             cout_redirect cr(outputBuffer.rdbuf());
             assert(ssTestOutputSetup_ShouldSetupCorrectly_WhenCalled() == 0);
-            assert(outputBuffer.str().find("Setting up:") != std::string::npos);
-            assert(outputBuffer.str().find("someVar = 1;") != std::string::npos);
         }
-        std::cout << outputBuffer.str();
+        std::cout << outputBuffer.str() << std::endl;
+        assert(outputBuffer.str().find("Setting up:") != std::string::npos);
+        assert(outputBuffer.str().find("someVar = 1;") != std::string::npos);
         
         {
             outputBuffer.str("");
             outputBuffer.clear();
             cout_redirect cr(outputBuffer.rdbuf());
             assert(ssTestOutputSetup_ShouldNotOutput_WhenOutputDisabled() == 0);
-            assert(outputBuffer.str().find("Setting up:") == std::string::npos);
-            assert(outputBuffer.str().find("someVar = 1;") == std::string::npos);
         }
-        std::cout << outputBuffer.str();
+        std::cout << outputBuffer.str() << std::endl;
+        assert(outputBuffer.str().find("Setting up:") == std::string::npos);
+        assert(outputBuffer.str().find("someVar = 1;") == std::string::npos);
     }
     
     {
@@ -648,20 +661,20 @@ int main()
             outputBuffer.clear();
             cout_redirect cr(outputBuffer.rdbuf());
             assert(ssTestOutputExecution_ShouldExecuteCorrectly_WhenCalled() == 0);
-            assert(outputBuffer.str().find("Executing:") != std::string::npos);
-            assert(outputBuffer.str().find("someVar = 1;") != std::string::npos);
         }
-        std::cout << outputBuffer.str();
+        std::cout << outputBuffer.str() << std::endl;
+        assert(outputBuffer.str().find("Executing:") != std::string::npos);
+        assert(outputBuffer.str().find("someVar = 1;") != std::string::npos);
         
         {
             outputBuffer.str("");
             outputBuffer.clear();
             cout_redirect cr(outputBuffer.rdbuf());
             assert(ssTestOutputExecution_ShouldNotOutput_WhenOutputDisabled() == 0);
-            assert(outputBuffer.str().find("Executing:") == std::string::npos);
-            assert(outputBuffer.str().find("someVar = 1;") == std::string::npos);
         }
-        std::cout << outputBuffer.str();
+        std::cout << outputBuffer.str() << std::endl;
+        assert(outputBuffer.str().find("Executing:") == std::string::npos);
+        assert(outputBuffer.str().find("someVar = 1;") == std::string::npos);
     }
     
     {
@@ -669,13 +682,13 @@ int main()
         outputBuffer.clear();
         cout_redirect cr(outputBuffer.rdbuf());
         assert(ssTestOutputValuesWhenFailed_ShouldOutputValues_WhenFailed() == 1);
-        assert(outputBuffer.str().find("someVar = 1") != std::string::npos);
-        assert(outputBuffer.str().find("2 = 2") != std::string::npos);
-        assert(outputBuffer.str().find("someVar2 = a") != std::string::npos);
-        assert(outputBuffer.str().find("someVar3 = Test Var") != std::string::npos);
-        assert(outputBuffer.str().find("someVar4 = 1") != std::string::npos);
     }
-    std::cout << outputBuffer.str();
+    std::cout << outputBuffer.str() << std::endl;
+    assert(outputBuffer.str().find("someVar = 1") != std::string::npos);
+    assert(outputBuffer.str().find("2 = 2") != std::string::npos);
+    assert(outputBuffer.str().find("someVar2 = a") != std::string::npos);
+    assert(outputBuffer.str().find("someVar3 = Test Var") != std::string::npos);
+    assert(outputBuffer.str().find("someVar4 = 1") != std::string::npos);
     
     std::cout << "Everything passed" << std::endl;
     

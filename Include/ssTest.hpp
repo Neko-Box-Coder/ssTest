@@ -1,4 +1,4 @@
-#if defined(ssTEST_USE_ASCII) || ssTEST_ASCII
+#if !defined(ssTEST_NO_COLOR_OUTPUT) || !ssTEST_NO_COLOR_OUTPUT
     #define TERMCOLOR_USE_ANSI_ESCAPE_SEQUENCES
 #endif
 
@@ -1046,7 +1046,7 @@
 
 
 
-#if !defined(ssTEST_ASCII) || !ssTEST_ASCII
+#if !defined(ssTEST_NO_COLOR_OUTPUT) || !ssTEST_NO_COLOR_OUTPUT
     #define INTERN_ssTEST_CBEGIN termcolor::colorize
     #define INTERN_ssTEST_CEND termcolor::reset
     
@@ -1399,7 +1399,7 @@ namespace Internal_ssTest
         //Add newlines for each statement, excluding codes in curly brackets
         bool ssTestInsideCurlyBrackets = false;
         for(size_t i = 0; i < ssTestCodeStr.size() - 1; ++i)
-        { \
+        {
             if(ssTestCodeStr[i] == '{')
                 ssTestInsideCurlyBrackets = true;
             else if(ssTestCodeStr[i] == '}')
@@ -1645,13 +1645,13 @@ namespace Internal_ssTest
             {
                 INTERN_INDENTED_COUT << INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CRED << 
                                         "|     Assertion Failed For Expression: " << 
-                                        assertExpression;
+                                        INTERN_ssTEST_CEND;
                 
-                if(ssTest_Status.ssTest_OutputAsserts)
-                    std::cout << INTERN_ssTEST_CEND << std::endl;
-                else
+                OutputFormattedCode("", assertExpression, false);
+                
                 {
-                    std::cout <<    " on line " << line << " in " << ssTest_Status.ssTest_FileName <<
+                    std::cout <<    INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CRED <<
+                                    " on line " << line << " in " << ssTest_Status.ssTest_FileName <<
                                     ssTest_Status.ssTest_FileExt << INTERN_ssTEST_CEND << std::endl;
                 }
             }
@@ -1693,16 +1693,18 @@ namespace Internal_ssTest
                 if(!ssTestInternalResult)
                 {
                     INTERN_INDENTED_COUT << INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CRED << 
-                                            "|     Assertion Failed For Expression: ";
+                                            "|     Assertion Failed For Expression: " <<
+                                            INTERN_ssTEST_CEND;
+                    
                     OutputFormattedCode("", assertValuePrint, false);
-                    std::cout << " " << operatorValuePrint << " ";
+                    std::cout <<    " " << INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CMAGENTA << 
+                                    operatorValuePrint << " " << INTERN_ssTEST_CEND;
+                    
                     OutputFormattedCode("", expectedValuePrint, false);
                     
-                    if(ssTest_Status.ssTest_OutputAsserts)
-                        std::cout << INTERN_ssTEST_CEND << std::endl;
-                    else
                     {
-                        std::cout <<    " on line " << line << " in " << 
+                        std::cout <<    INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CRED << 
+                                        " on line " << line << " in " << 
                                         ssTest_Status.ssTest_FileName <<
                                         ssTest_Status.ssTest_FileExt << INTERN_ssTEST_CEND << 
                                         std::endl;

@@ -8,6 +8,7 @@ The last thing you want is to spend so much time trying to figure out how to imp
 ## 📦️ Installation
 
 Just include `ssTest.hpp` into your project
+To disable color output, either `#ssTEST_NO_COLOR_OUTPUT 1` before the include or set it in cmake option
 
 ## 🏃 Quick Start
 Here is a quick example of what ssTest looks like in a simple example. 

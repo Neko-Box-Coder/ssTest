@@ -1038,7 +1038,7 @@
 #include <iostream>
 #include <vector>
 
-#define ssCOUT std::cout << ssTest_Status.ssTest_Indent
+#define INTERN_INDENTED_COUT std::cout << ssTest_Status.ssTest_Indent
 
 #define INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE(indentation, code) \
     Internal_ssTest::ProcessAndOutputFormattedCode( indentation, \
@@ -1068,51 +1068,51 @@
 #define INTERNAL_ssTEST_OUTPUT_VALUES_WHEN_FAILED_1(_1) \
     if(!ssTest_Status.ssTest_LastTestResult) \
     { \
-        ssCOUT << termcolor::red << "|     Assertion Failed Values: " << std::endl; \
-        ssCOUT <<   "|          " << #_1 << " = " << _1 << termcolor::reset << std::endl; \
-        ssCOUT << "|" << std::endl; \
+        INTERN_INDENTED_COUT << termcolor::red << "|     Assertion Failed Values: " << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_1 << " = " << _1 << termcolor::reset << std::endl; \
+        INTERN_INDENTED_COUT << "|" << std::endl; \
     }
 
 #define INTERNAL_ssTEST_OUTPUT_VALUES_WHEN_FAILED_2(_1, _2) \
     if(!ssTest_Status.ssTest_LastTestResult) \
     { \
-        ssCOUT << termcolor::red << "|     Assertion Failed Values: " << std::endl; \
-        ssCOUT <<   "|          " << #_1 << " = " << _1 << std::endl; \
-        ssCOUT <<   "|          " << #_2 << " = " << _2 << termcolor::reset << std::endl; \
-        ssCOUT << "|" << std::endl; \
+        INTERN_INDENTED_COUT << termcolor::red << "|     Assertion Failed Values: " << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_1 << " = " << _1 << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_2 << " = " << _2 << termcolor::reset << std::endl; \
+        INTERN_INDENTED_COUT << "|" << std::endl; \
     }
 
 #define INTERNAL_ssTEST_OUTPUT_VALUES_WHEN_FAILED_3(_1, _2, _3) \
     if(!ssTest_Status.ssTest_LastTestResult) \
     { \
-        ssCOUT << termcolor::red << "|     Assertion Failed Values: " << std::endl; \
-        ssCOUT <<   "|          " << #_1 << " = " << _1 << std::endl; \
-        ssCOUT <<   "|          " << #_2 << " = " << _2 << std::endl; \
-        ssCOUT <<   "|          " << #_3 << " = " << _3 << termcolor::reset << std::endl; \
-        ssCOUT << "|" << std::endl; \
+        INTERN_INDENTED_COUT << termcolor::red << "|     Assertion Failed Values: " << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_1 << " = " << _1 << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_2 << " = " << _2 << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_3 << " = " << _3 << termcolor::reset << std::endl; \
+        INTERN_INDENTED_COUT << "|" << std::endl; \
     }
 
 #define INTERNAL_ssTEST_OUTPUT_VALUES_WHEN_FAILED_4(_1, _2, _3, _4) \
     if(!ssTest_Status.ssTest_LastTestResult) \
     { \
-        ssCOUT << termcolor::red << "|     Assertion Failed Values: " << std::endl; \
-        ssCOUT <<   "|          " << #_1 << " = " << _1 << std::endl; \
-        ssCOUT <<   "|          " << #_2 << " = " << _2 << std::endl; \
-        ssCOUT <<   "|          " << #_3 << " = " << _3 << std::endl; \
-        ssCOUT <<   "|          " << #_4 << " = " << _4 << termcolor::reset << std::endl; \
-        ssCOUT << "|" << std::endl; \
+        INTERN_INDENTED_COUT << termcolor::red << "|     Assertion Failed Values: " << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_1 << " = " << _1 << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_2 << " = " << _2 << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_3 << " = " << _3 << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_4 << " = " << _4 << termcolor::reset << std::endl; \
+        INTERN_INDENTED_COUT << "|" << std::endl; \
     }
 
 #define INTERNAL_ssTEST_OUTPUT_VALUES_WHEN_FAILED_5(_1, _2, _3, _4, _5) \
     if(!ssTest_Status.ssTest_LastTestResult) \
     { \
-        ssCOUT << termcolor::red << "|     Assertion Failed Values: " << std::endl; \
-        ssCOUT <<   "|          " << #_1 << " = " << _1 << std::endl; \
-        ssCOUT <<   "|          " << #_2 << " = " << _2 << std::endl; \
-        ssCOUT <<   "|          " << #_3 << " = " << _3 << std::endl; \
-        ssCOUT <<   "|          " << #_4 << " = " << _4 << std::endl; \
-        ssCOUT <<   "|          " << #_5 << " = " << _5 << termcolor::reset << std::endl; \
-        ssCOUT << "|" << std::endl; \
+        INTERN_INDENTED_COUT << termcolor::red << "|     Assertion Failed Values: " << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_1 << " = " << _1 << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_2 << " = " << _2 << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_3 << " = " << _3 << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_4 << " = " << _4 << std::endl; \
+        INTERN_INDENTED_COUT <<   "|          " << #_5 << " = " << _5 << termcolor::reset << std::endl; \
+        INTERN_INDENTED_COUT << "|" << std::endl; \
     }
 
 #define INTERNAL_ssTEST_OUTPUT_ASSERT_2(info, assertExpression) \
@@ -1470,13 +1470,13 @@ namespace Internal_ssTest
     {
         if(info.empty())
         {
-            ssCOUT << termcolor::blue << "|---- Assertion Starts:" << termcolor::reset;
+            INTERN_INDENTED_COUT << termcolor::blue << "|---- Assertion Starts:" << termcolor::reset;
             OutputOptionalText(ssTest_Status);
             std::cout << std::endl;
         }
         else
         {
-            ssCOUT <<   termcolor::blue << "|---- Assertion Starts (" << info << "):" <<
+            INTERN_INDENTED_COUT <<   termcolor::blue << "|---- Assertion Starts (" << info << "):" <<
                         termcolor::reset;
         
             OutputOptionalText(ssTest_Status);
@@ -1490,12 +1490,12 @@ namespace Internal_ssTest
         {
             if(ssTest_Status.ssTest_OutputAsserts)
             {
-                ssCOUT <<    termcolor::green << "|     Assertion Passed (" <<
+                INTERN_INDENTED_COUT <<    termcolor::green << "|     Assertion Passed (" <<
                             (ssTest_Status.ssTest_RunningOptional ? "+" : "O") << ")" << termcolor::reset;
 
                 INTERNAL_ssTEST_OUTPUT_OPTIONAL_TEXT();
                 std::cout << std::endl;
-                ssCOUT << "|" << std::endl;
+                INTERN_INDENTED_COUT << "|" << std::endl;
             }
             
             ssTest_Status.ssTest_RunningOptional ? 
@@ -1506,12 +1506,12 @@ namespace Internal_ssTest
         {
             if(true)
             {
-                ssCOUT <<   termcolor::red << "|     Assertion Failed (" << \
+                INTERN_INDENTED_COUT <<   termcolor::red << "|     Assertion Failed (" << \
                             (ssTest_Status.ssTest_RunningOptional ? "-" : "X") << ")" << termcolor::reset; \
 
                 INTERNAL_ssTEST_OUTPUT_OPTIONAL_TEXT();
                 std::cout << std::endl;
-                ssCOUT << "|" << std::endl;
+                INTERN_INDENTED_COUT << "|" << std::endl;
             }
             
             ssTest_Status.ssTest_RunningOptional ? 
@@ -1524,16 +1524,16 @@ namespace Internal_ssTest
                                         std::string assertExpression,
                                         std::exception& ssTestExcept)
     {
-        ssCOUT <<   termcolor::red << "|     Trying to run " << assertExpression <<
+        INTERN_INDENTED_COUT <<   termcolor::red << "|     Trying to run " << assertExpression <<
                     termcolor::reset << std::endl;
         
-        ssCOUT <<   termcolor::red << "|     Error Caught (" << 
+        INTERN_INDENTED_COUT <<   termcolor::red << "|     Error Caught (" << 
                     (ssTest_Status.ssTest_RunningOptional ? "-" : "X") << 
                     "): " << ssTestExcept.what() << termcolor::reset;
         
         INTERNAL_ssTEST_OUTPUT_OPTIONAL_TEXT(); 
         std::cout << std::endl; 
-        ssCOUT << "|" << std::endl; 
+        INTERN_INDENTED_COUT << "|" << std::endl; 
         
         ssTest_Status.ssTest_AssertFailed++;
     }
@@ -1541,10 +1541,10 @@ namespace Internal_ssTest
     inline void OutputUnknownError( Internal_ssTest::TestStatus& ssTest_Status, 
                                     std::string assertExpression)
     {
-        ssCOUT <<   termcolor::red << "|     Trying to run " << assertExpression <<
+        INTERN_INDENTED_COUT <<   termcolor::red << "|     Trying to run " << assertExpression <<
                     termcolor::reset << std::endl;
 
-        ssCOUT <<   termcolor::red << "|     Error Caught (" << 
+        INTERN_INDENTED_COUT <<   termcolor::red << "|     Error Caught (" << 
                     (ssTest_Status.ssTest_RunningOptional ? "-" : "X") <<
                     ")" << termcolor::reset;
 
@@ -1553,7 +1553,7 @@ namespace Internal_ssTest
 
         if(ssTest_Status.ssTest_RunningOptional)
         {
-            ssCOUT <<   termcolor::yellow <<
+            INTERN_INDENTED_COUT <<   termcolor::yellow <<
                         "|     Continuing even with unknown error for optional asserts" <<
                         termcolor::reset << std::endl;
 
@@ -1561,11 +1561,11 @@ namespace Internal_ssTest
         }
         else
         {
-            ssCOUT <<   termcolor::red << "|     Re-throwing unknown error..." << 
+            INTERN_INDENTED_COUT <<   termcolor::red << "|     Re-throwing unknown error..." << 
                         termcolor::reset << std::endl;
             throw;
         }
-        ssCOUT << "|" << std::endl;
+        INTERN_INDENTED_COUT << "|" << std::endl;
     }
     
     inline void OutputAssert(   Internal_ssTest::TestStatus& ssTest_Status,
@@ -1579,7 +1579,7 @@ namespace Internal_ssTest
             if(ssTest_Status.ssTest_OutputAsserts)
             {
                 INTERNAL_ssTEST_OUTPUT_ASSERT_STARTS(info);
-                ssCOUT <<   "|     Asserting: ";
+                INTERN_INDENTED_COUT <<   "|     Asserting: ";
                 OutputFormattedCode("", assertExpression, false);
                 std::cout << " on line " << line << " in " << ssTest_Status.ssTest_FileName << 
                 ssTest_Status.ssTest_FileExt << std::endl;
@@ -1591,7 +1591,7 @@ namespace Internal_ssTest
 
             if(!ssTestInternalResult)
             {
-                ssCOUT <<   termcolor::red << "|     Assertion Failed For Expression: " << 
+                INTERN_INDENTED_COUT <<   termcolor::red << "|     Assertion Failed For Expression: " << 
                             assertExpression;
                 
                 if(ssTest_Status.ssTest_OutputAsserts)
@@ -1624,7 +1624,7 @@ namespace Internal_ssTest
             if(ssTest_Status.ssTest_OutputAsserts)
             {
                 INTERNAL_ssTEST_OUTPUT_ASSERT_STARTS(info);
-                ssCOUT <<   "|     Asserting: ";
+                INTERN_INDENTED_COUT <<   "|     Asserting: ";
                 OutputFormattedCode("", assertValuePrint, false);
                 std::cout << " " << operatorValuePrint << " ";
                 OutputFormattedCode("", expectedValuePrint, false);
@@ -1639,7 +1639,7 @@ namespace Internal_ssTest
 
                 if(!ssTestInternalResult)
                 {
-                    ssCOUT <<   termcolor::red << "|     Assertion Failed For Expression: ";
+                    INTERN_INDENTED_COUT <<   termcolor::red << "|     Assertion Failed For Expression: ";
                     OutputFormattedCode("", assertValuePrint, false);
                     std::cout << " " << operatorValuePrint << " ";
                     OutputFormattedCode("", expectedValuePrint, false);
@@ -1654,9 +1654,9 @@ namespace Internal_ssTest
 
                     if(!ssTestInternalResult)
                     {
-                        ssCOUT << termcolor::red << "|     Assertion Failed Values: " << std::endl;
-                        ssCOUT <<   "|          " << assertValuePrint << " = " << assertValue << std::endl;
-                        ssCOUT <<   "|          " << expectedValuePrint << " = " << expectedValue << termcolor::reset <<
+                        INTERN_INDENTED_COUT << termcolor::red << "|     Assertion Failed Values: " << std::endl;
+                        INTERN_INDENTED_COUT <<   "|          " << assertValuePrint << " = " << assertValue << std::endl;
+                        INTERN_INDENTED_COUT <<   "|          " << expectedValuePrint << " = " << expectedValue << termcolor::reset <<
                                     std::endl;
                     }
                 }
@@ -1674,23 +1674,23 @@ namespace Internal_ssTest
                             std::string assertExpression)
     {
         if(std::string(info).empty())
-            ssCOUT << termcolor::blue << "|---- Assertion Starts: " << termcolor::reset << std::endl;
+            INTERN_INDENTED_COUT << termcolor::blue << "|---- Assertion Starts: " << termcolor::reset << std::endl;
         else
         {
-            ssCOUT <<   termcolor::blue << "|---- Assertion Starts (" << info << "):" <<
+            INTERN_INDENTED_COUT <<   termcolor::blue << "|---- Assertion Starts (" << info << "):" <<
                         termcolor::reset << std::endl;
         }
 
-        ssCOUT <<   "|     Skipping: "; 
+        INTERN_INDENTED_COUT <<   "|     Skipping: "; 
         OutputFormattedCode("", assertExpression, false);
         
         std::cout <<    " on line " << line << " in " << ssTest_Status.ssTest_FileName << 
                         ssTest_Status.ssTest_FileExt << std::endl;
 
-        ssCOUT <<   "|     " << termcolor::yellow << "Assertion Skipped (/)" << termcolor::reset <<
+        INTERN_INDENTED_COUT <<   "|     " << termcolor::yellow << "Assertion Skipped (/)" << termcolor::reset <<
                     std::endl;
 
-        ssCOUT << "|" << std::endl;
+        INTERN_INDENTED_COUT << "|" << std::endl;
     }
     
     #ifdef _WIN32
@@ -1704,30 +1704,30 @@ namespace Internal_ssTest
             SetConsoleOutputCP(CP_UTF8);
         #endif
         
-        ssCOUT << "=====================================================================" << std::endl;
-        ssCOUT << "\\ " << std::endl;
-        ssCOUT << " > " << ssTest_Status.ssTest_Name.c_str() << std::endl;
-        ssCOUT << "/ " << std::endl;
-        ssCOUT << "=====================================================================" << std::endl;
-        ssCOUT << std::endl;
+        INTERN_INDENTED_COUT << "=====================================================================" << std::endl;
+        INTERN_INDENTED_COUT << "\\ " << std::endl;
+        INTERN_INDENTED_COUT << " > " << ssTest_Status.ssTest_Name.c_str() << std::endl;
+        INTERN_INDENTED_COUT << "/ " << std::endl;
+        INTERN_INDENTED_COUT << "=====================================================================" << std::endl;
+        INTERN_INDENTED_COUT << std::endl;
 
-        ssCOUT << "List of all " << ssTest_Status.ssTest_Functions.size() << " tests:" << std::endl;
+        INTERN_INDENTED_COUT << "List of all " << ssTest_Status.ssTest_Functions.size() << " tests:" << std::endl;
         for(size_t i = 0; i < ssTest_Status.ssTest_Functions.size(); i++)
         {
             if(ssTest_Status.ssTest_FunctionsSkipFlags.at(i))
             {
-                ssCOUT << "- (Skipped) \"" << ssTest_Status.ssTest_FunctionsNames.at(i) << "\"" <<
+                INTERN_INDENTED_COUT << "- (Skipped) \"" << ssTest_Status.ssTest_FunctionsNames.at(i) << "\"" <<
                 std::endl;
                 ++ssTest_Status.ssTest_TestSkipped;
             }
             else
-                ssCOUT << "- \"" << ssTest_Status.ssTest_FunctionsNames.at(i) << "\"" << std::endl;
+                INTERN_INDENTED_COUT << "- \"" << ssTest_Status.ssTest_FunctionsNames.at(i) << "\"" << std::endl;
         }
 
         if(ssTest_Status.ssTest_TestOnly != -1)
         {
-            ssCOUT << std::endl;
-            ssCOUT << "But only running: \"" <<
+            INTERN_INDENTED_COUT << std::endl;
+            INTERN_INDENTED_COUT << "But only running: \"" <<
                 ssTest_Status.ssTest_FunctionsNames.at(ssTest_Status.ssTest_TestOnly) << "\"" <<
                 std::endl;
         }
@@ -1739,17 +1739,17 @@ namespace Internal_ssTest
             if(ssTest_Status.ssTest_TestOnly != -1 && static_cast<int>(i) != ssTest_Status.ssTest_TestOnly)
                 continue;
 
-            ssCOUT << std::endl;
-            ssCOUT << "+-------------------------------------------------------" << std::endl;
-            ssCOUT << "+ Running \"" << ssTest_Status.ssTest_FunctionsNames.at(i) << "\":" << std::endl;
-            ssCOUT << "V-------------------------------------------------------" << std::endl;
+            INTERN_INDENTED_COUT << std::endl;
+            INTERN_INDENTED_COUT << "+-------------------------------------------------------" << std::endl;
+            INTERN_INDENTED_COUT << "+ Running \"" << ssTest_Status.ssTest_FunctionsNames.at(i) << "\":" << std::endl;
+            INTERN_INDENTED_COUT << "V-------------------------------------------------------" << std::endl;
 
             if(ssTest_Status.ssTest_FunctionsSkipFlags.at(i))
             {
-                ssCOUT <<   termcolor::yellow << "|---> Test Skipped <---" <<
+                INTERN_INDENTED_COUT <<   termcolor::yellow << "|---> Test Skipped <---" <<
                             termcolor::reset << std::endl;
 
-                ssCOUT << "L" << std::endl;
+                INTERN_INDENTED_COUT << "L" << std::endl;
                 continue;
             }
             else
@@ -1759,7 +1759,7 @@ namespace Internal_ssTest
 
                 int ssTestLastFailedCount = ssTest_Status.ssTest_AssertFailed;
                 ssTest_Status.ssTest_Functions.at(i)();
-                ssCOUT << "L" << std::endl;
+                INTERN_INDENTED_COUT << "L" << std::endl;
 
                 if(ssTestLastFailedCount == ssTest_Status.ssTest_AssertFailed)
                     ++ssTest_Status.ssTest_TestSuccess;
@@ -1778,41 +1778,41 @@ namespace Internal_ssTest
 
         int ssTestAssertTotal = ssTest_Status.ssTest_AssertSuccess + ssTest_Status.ssTest_AssertFailed;
         int ssTestOptionalAssertTotal = ssTest_Status.ssTest_OptionalSuccess + ssTest_Status.ssTest_OptionalFailed;
-        ssCOUT << std::endl;
-        ssCOUT << "All tests results:" << std::endl;
-        ssCOUT <<   ssTest_Status.ssTest_TestSuccess << "/" << (ssTest_Status.ssTest_TestOnly != -1 ?
+        INTERN_INDENTED_COUT << std::endl;
+        INTERN_INDENTED_COUT << "All tests results:" << std::endl;
+        INTERN_INDENTED_COUT <<   ssTest_Status.ssTest_TestSuccess << "/" << (ssTest_Status.ssTest_TestOnly != -1 ?
                     1 :
                     ssTest_Status.ssTest_Functions.size() - ssTest_Status.ssTest_TestSkipped) << " tests passed" << std::endl;
 
-        ssCOUT << ssTest_Status.ssTest_AssertSuccess << "/" << ssTestAssertTotal << " assertions passed" << std::endl;
+        INTERN_INDENTED_COUT << ssTest_Status.ssTest_AssertSuccess << "/" << ssTestAssertTotal << " assertions passed" << std::endl;
 
         if(ssTestOptionalAssertTotal > 0)
         {
-            ssCOUT <<   termcolor::yellow << ssTest_Status.ssTest_OptionalSuccess << "/" <<
+            INTERN_INDENTED_COUT <<   termcolor::yellow << ssTest_Status.ssTest_OptionalSuccess << "/" <<
                         ssTestOptionalAssertTotal << " optional assertions passed" <<
                         termcolor::reset << std::endl;
         }
 
         if(ssTest_Status.ssTest_AssertFailed > 0)
         {
-            ssCOUT <<   termcolor::red << ssTest_Status.ssTest_Name << " group has failed some tests (XXX)" <<
+            INTERN_INDENTED_COUT <<   termcolor::red << ssTest_Status.ssTest_Name << " group has failed some tests (XXX)" <<
                         termcolor::reset << std::endl;
 
             for(size_t i = 0; i < ssTest_Status.ssTest_FailedTestsNames.size(); i++)
             {
-                ssCOUT <<   termcolor::red << "- \"" << ssTest_Status.ssTest_FailedTestsNames.at(i) <<
+                INTERN_INDENTED_COUT <<   termcolor::red << "- \"" << ssTest_Status.ssTest_FailedTestsNames.at(i) <<
                             "\" failed" << termcolor::reset << std::endl;
             }
 
-            ssCOUT << std::endl;
+            INTERN_INDENTED_COUT << std::endl;
             return EXIT_FAILURE;
         }
         else
         {\
-            ssCOUT <<   termcolor::green << ssTest_Status.ssTest_Name << " group has passed all tests (OOO)" <<
+            INTERN_INDENTED_COUT <<   termcolor::green << ssTest_Status.ssTest_Name << " group has passed all tests (OOO)" <<
                         termcolor::reset << std::endl;
 
-            ssCOUT << std::endl;
+            INTERN_INDENTED_COUT << std::endl;
             return EXIT_SUCCESS;
         }
     }
@@ -1854,42 +1854,42 @@ namespace Internal_ssTest
 #define ssTEST_OUTPUT_SETUP( setup, ... ) \
     if(ssTest_Status.ssTest_OutputSetups) \
     { \
-        ssCOUT << termcolor::blue << "|---- Setting up: " << termcolor::reset << std::endl; \
+        INTERN_INDENTED_COUT << termcolor::blue << "|---- Setting up: " << termcolor::reset << std::endl; \
         INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE(ssTest_Status.ssTest_Indent + "|     ", (setup INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS(__VA_ARGS__))); \
     } \
     setup INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS(__VA_ARGS__) \
     if(ssTest_Status.ssTest_OutputSetups) \
-        ssCOUT << "|" << std::endl
+        INTERN_INDENTED_COUT << "|" << std::endl
 
 #define ssTEST_OUTPUT_SKIP_SETUP( setup, ... ) \
     if(ssTest_Status.ssTest_OutputSetups) \
     { \
-        ssCOUT << termcolor::yellow << "|---- Skip setting up: " << termcolor::reset << std::endl; \
+        INTERN_INDENTED_COUT << termcolor::yellow << "|---- Skip setting up: " << termcolor::reset << std::endl; \
         INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE(ssTest_Status.ssTest_Indent + "|     ", (setup INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS(__VA_ARGS__))); \
     } \
     if(ssTest_Status.ssTest_OutputSetups) \
-        ssCOUT << "|" << std::endl
+        INTERN_INDENTED_COUT << "|" << std::endl
 
 #define ssTEST_DISABLE_OUTPUT_EXECUTION() ssTest_Status.ssTest_OutputExecutions = false;
 
 #define ssTEST_OUTPUT_EXECUTION( execution, ... ) \
     if(ssTest_Status.ssTest_OutputExecutions) \
     { \
-        ssCOUT << termcolor::blue << "|---- Executing: " << termcolor::reset << std::endl; \
+        INTERN_INDENTED_COUT << termcolor::blue << "|---- Executing: " << termcolor::reset << std::endl; \
         INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE(ssTest_Status.ssTest_Indent + "|     ", (execution INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS(__VA_ARGS__))); \
     } \
     execution INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS(__VA_ARGS__) \
     if(ssTest_Status.ssTest_OutputExecutions) \
-        ssCOUT << "|" << std::endl
+        INTERN_INDENTED_COUT << "|" << std::endl
 
 #define ssTEST_OUTPUT_SKIP_EXECUTION( execution, ... ) \
     if(ssTest_Status.ssTest_OutputExecutions) \
     { \
-        ssCOUT << termcolor::yellow << "|---- Skip executing: " << termcolor::reset << std::endl; \
+        INTERN_INDENTED_COUT << termcolor::yellow << "|---- Skip executing: " << termcolor::reset << std::endl; \
         INTERNAL_ssTEST_OUTPUT_FORMATTED_CODE(ssTest_Status.ssTest_Indent + "|     ", (execution INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS(__VA_ARGS__))); \
     } \
     if(ssTest_Status.ssTest_OutputExecutions) \
-        ssCOUT << "|" << std::endl
+        INTERN_INDENTED_COUT << "|" << std::endl
 
 #define ssTEST_DISABLE_OUTPUT_ASSERT() ssTest_Status.ssTest_OutputAsserts = false;
 
@@ -1948,12 +1948,12 @@ namespace Internal_ssTest
     } \
     catch(const std::exception& e) \
     { \
-        ssCOUT << "Error Caught (XXX): " << e.what() << std::endl; \
+        INTERN_INDENTED_COUT << "Error Caught (XXX): " << e.what() << std::endl; \
         throw; \
     } \
     catch(...) \
     { \
-        ssCOUT << "Unknown Error Caught (XXX)" << std::endl; \
+        INTERN_INDENTED_COUT << "Unknown Error Caught (XXX)" << std::endl; \
         throw; \
     } \
 }

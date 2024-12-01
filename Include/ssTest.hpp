@@ -1,5 +1,7 @@
 #if !defined(ssTEST_NO_COLOR_OUTPUT) || !ssTEST_NO_COLOR_OUTPUT
-    #define TERMCOLOR_USE_ANSI_ESCAPE_SEQUENCES
+    #if !defined TERMCOLOR_USE_ANSI_ESCAPE_SEQUENCES
+        #define TERMCOLOR_USE_ANSI_ESCAPE_SEQUENCES
+    #endif
 #endif
 
 //=======================================================================

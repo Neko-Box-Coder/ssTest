@@ -237,6 +237,8 @@ pipeline
                         bash "cd ./Build && ./ssTestCheck"
                         bash "chmod +x ./Build/ssTestCheckColored"
                         bash "cd ./Build && ./ssTestCheckColored"
+                        bash "chmod +x ./Build/ssTestCodeFormatTest"
+                        bash "cd ./Build && ./ssTestCodeFormatTest"
                     }
                     post { failure { script { FAILED_STAGE = env.STAGE_NAME } } }
                 }
@@ -260,6 +262,7 @@ pipeline
                         
                         bat 'cd .\\Build\\Debug && .\\ssTestCheck.exe'
                         bat 'cd .\\Build\\Debug && .\\ssTestCheckColored.exe'
+                        bat 'cd .\\Build\\Debug && .\\ssTestCodeFormatTest.exe'
                     }
                     post { failure { script { FAILED_STAGE = env.STAGE_NAME } } }
                 }

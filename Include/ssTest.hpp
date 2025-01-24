@@ -2060,6 +2060,8 @@ namespace Internal_ssTest
         } \
     } while(0)
 
+#define ssTEST_OUTPUT(x) \
+    INTERN_INDENTED_COUT << "|     Output: " << x << std::endl
 
 #define ssTEST_OUTPUT_VALUES_WHEN_FAILED( ... ) \
     do \

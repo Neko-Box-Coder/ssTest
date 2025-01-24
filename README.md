@@ -288,6 +288,9 @@ but failure of the assertion will **not** fail the test.
 #### Outputting Values (Up to 5 values) When An Assertion Failed
 - `ssTEST_OUTPUT_VALUES_WHEN_FAILED(comma, separated, values,...);`: Output the values of the variables when the assertion failed.
 
+#### Outputting Values In Test Format
+- `ssTEST_OUTPUT(expression);`: Output message which expands to `std::cout << expression << std::endl`
+
 #### Calling Common Setup And Cleanup Manually (Advanced)
 - `ssTEST_CALL_COMMON_SETUP();`: Calls the common setup function manually
 - `ssTEST_CALL_COMMON_CLEANUP();`: Calls the common cleanup function manually

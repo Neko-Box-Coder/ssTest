@@ -1000,14 +1000,49 @@
 //Macros for allowing overloadable Macro functions
 //=======================================================================
 
-// https://stackoverflow.com/questions/16683146/can-macros-be-overloaded-by-number-of-arguments
+//Modified from https://stackoverflow.com/questions/16683146/can-macros-be-overloaded-by-number-of-arguments
 #define INTERNAL_ssTEST_CAT( A, B ) A ## B
-#define INTERNAL_ssTEST_SELECT( NAME, NUM ) INTERNAL_ssTEST_CAT( NAME ## _, NUM )
+#define INTERNAL_ssTEST_CAT_MUTLI( A, B, ... ) A ## B
 #define INTERNAL_ssTEST_COMPOSE( NAME, ARGS ) NAME ARGS
+#define INTERNAL_ssTEST_COMPOSE2( NAME, ARGS ) NAME ARGS
+#define INTERNAL_ssTEST_COMPOSE3( NAME, ARGS ) NAME ARGS
+#define INTERNAL_ssTEST_COMPOSE4( NAME, ARGS ) NAME ARGS
+#define INTERNAL_ssTEST_COMPOSE5( NAME, ARGS ) NAME ARGS
+#define INTERNAL_ssTEST_COMPOSE6( NAME, ARGS ) NAME ARGS
+#define INTERNAL_ssTEST_COMPOSE7( NAME, ARGS ) NAME ARGS
+#define INTERNAL_ssTEST_COMPOSE8( NAME, ARGS ) NAME ARGS
+#define INTERNAL_ssTEST_COMPOSE9( NAME, ARGS ) NAME ARGS
 
-#define INTERNAL_ssTEST_GET_COUNT( _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11 /* ad nauseam */, COUNT, ... ) COUNT
-#define INTERNAL_ssTEST_EXPAND() ,,,,,,,,,,, // 6 commas (or 7 empty tokens)
-#define INTERNAL_ssTEST_VA_SIZE( ... ) INTERNAL_ssTEST_COMPOSE( INTERNAL_ssTEST_GET_COUNT, (INTERNAL_ssTEST_EXPAND __VA_ARGS__ (), 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1) )
+#define INTERNAL_ssTEST_SELECT( NAME, NUM ) INTERNAL_ssTEST_COMPOSE8(INTERNAL_ssTEST_COMPOSE7, (INTERNAL_ssTEST_CAT, ( NAME ## _, NUM )))
+
+#define INTERNAL_ssTEST_DELAYED_CAT_MUTLI( ... ) INTERNAL_ssTEST_COMPOSE( INTERNAL_ssTEST_CAT_MUTLI, (__VA_ARGS__) )
+
+#define INTERNAL_ssTEST_GET_COUNT( _0, _1, _2, _3, _4, _5, _6 /* ad nauseam */, COUNT, ... ) COUNT
+#define INTERNAL_ssTEST_EXPAND() ,,,,,, // 6 commas (or 7 empty tokens)
+
+#define INTERNAL_ssTEST_TEST_PAREN( ... ) PLACEHOLDER
+#define INTERNAL_ssTEST_CANCEL_INTERNAL_ssTEST_TEST_PAREN
+
+//Returns PLACEHOLDER __VA_ARGS__ if the first argument has parenthses, otherwise __VA_ARGS__
+#define INTERNAL_ssTEST_TEST_ARGS_BRACKET( ... ) \
+    INTERNAL_ssTEST_COMPOSE2(INTERNAL_ssTEST_DELAYED_CAT_MUTLI, \
+                            (INTERNAL_ssTEST_CANCEL_, INTERNAL_ssTEST_TEST_PAREN __VA_ARGS__)) __VA_ARGS__
+
+#define INTERNAL_ssTEST_VA_SIZE( ... ) \
+    INTERNAL_ssTEST_COMPOSE6 \
+    ( \
+        INTERNAL_ssTEST_COMPOSE5, \
+        ( \
+            INTERNAL_ssTEST_COMPOSE4, \
+            ( \
+                INTERNAL_ssTEST_COMPOSE3, \
+                ( \
+                    INTERNAL_ssTEST_GET_COUNT, \
+                    (INTERNAL_ssTEST_EXPAND INTERNAL_ssTEST_TEST_ARGS_BRACKET(__VA_ARGS__) () , 0, 6, 5, 4, 3, 2, 1) \
+                ) \
+            ) \
+        ) \
+    )
 
 #ifndef _MSC_VER
 #define INTERNAL_ssTEST_VA_SELECT( NAME, ... ) INTERNAL_ssTEST_SELECT( NAME, INTERNAL_ssTEST_VA_SIZE(__VA_ARGS__) )(__VA_ARGS__)
@@ -1016,7 +1051,8 @@
 //MSVC workaround: https://stackoverflow.com/questions/48710758/how-to-fix-variadic-macro-related-issues-with-macro-overloading-in-msvc-mic
 //This is honestly retarded.
 #define INTERNAL_ssTEST_VA_ARGS_FIX( macro, args ) macro args
-#define INTERNAL_ssTEST_VA_SELECT( NAME, ... ) INTERNAL_ssTEST_VA_ARGS_FIX(INTERNAL_ssTEST_SELECT, ( NAME, INTERNAL_ssTEST_VA_SIZE( __VA_ARGS__ ) )) (__VA_ARGS__)
+#define INTERNAL_ssTEST_VA_SELECT( NAME, ... ) \
+    INTERNAL_ssTEST_COMPOSE9(INTERNAL_ssTEST_VA_ARGS_FIX, (INTERNAL_ssTEST_SELECT, ( NAME, INTERNAL_ssTEST_VA_SIZE( __VA_ARGS__ ) ))) (__VA_ARGS__)
 #endif
 
 #define INTERNAL_ssTEST_EXPAND_VA_IF_EXISTS( ... ) \

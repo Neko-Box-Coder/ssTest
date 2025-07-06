@@ -125,9 +125,6 @@ but you can do any other way you see fit.
 - `ssTEST_INIT_TEST_GROUP();` : Initialize a test group with the name of the current file
 - `ssTEST_INIT_TEST_GROUP("testGroupName");`: Initialize a test group with `testGroupName`.
 
-> [!CAUTION]
-> Due to how macro overloading works, the first argument cannot start with parenthesis ('(')
-
 #### Common Setup And Cleanup
 > These should be called before declaring the first test (`ssTEST()`) in the test group
 
@@ -275,9 +272,6 @@ equal and output result with `info`.
 - `ssTEST_OUTPUT_ASSERT("info", assertValue, expectedValue, operator);`: Assert if the `assertValue` 
 and `expectedValue` returns true when compared with the `operator` and output result with `info`.
 
-> [!CAUTION]
-> Due to how macro overloading works, the first argument cannot start with parenthesis ('(')
-
 #### Optional Assertions
 - `ssTEST_OUTPUT_OPTIONAL_ASSERT(...);`: Execute the assertions with arguments same as "Required Assertions"
 but failure of the assertion will **not** fail the test.
@@ -293,9 +287,6 @@ but failure of the assertion will **not** fail the test.
 
 #### Outputting Values (Up to 5 values) When An Assertion Failed
 - `ssTEST_OUTPUT_VALUES_WHEN_FAILED(comma, separated, values,...);`: Output the values of the variables when the assertion failed.
-
-> [!CAUTION]
-> Due to how macro overloading works, the first argument cannot start with parenthesis ('(')
 
 #### Outputting Values In Test Format
 - `ssTEST_OUTPUT(expression);`: Output message which expands to `std::cout << expression << std::endl`

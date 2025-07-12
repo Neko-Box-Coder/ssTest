@@ -1357,7 +1357,8 @@ namespace Internal_ssTest
             "include", 
             "if", "else", "for", "while", "do", "switch", "case", "break",
             "continue", "return", "true", "false", "nullptr", "new", "delete", "using",
-            "try", "throw", "this",
+            "try", "throw", "this", "assert", "static_assert", "static_cast", "dynamic_cast",
+            "interpret_cast", "decltype",
             
             "class", "struct", "enum", "union", "template", "typename", "namespace",
             
@@ -1427,7 +1428,8 @@ namespace Internal_ssTest
                         else if(currentOutput.back() == '"')
                             inString = false;
                     }
-                    else if(inNumber || (currentOutput.size() == 1 && isdigit(currentOutput.front())))
+                    else if(inNumber || (currentOutput.size() == 1 && 
+                                        isdigit(currentOutput.front()) != 0))
                     {
                         std::cout <<    INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CYELLOW << 
                                         currentOutput << INTERN_ssTEST_CEND;
@@ -1509,36 +1511,139 @@ namespace Internal_ssTest
                 break;
         }
         
-        //Add newlines for each statement, excluding codes in curly brackets
-        bool ssTestInsideCurlyBrackets = false;
-        for(size_t i = 0; i < ssTestCodeStr.size() - 1; ++i)
+        //Removing spaces after statements
         {
-            if(ssTestCodeStr[i] == '{')
-                ssTestInsideCurlyBrackets = true;
-            else if(ssTestCodeStr[i] == '}')
-                ssTestInsideCurlyBrackets = false;
-
-            if(!ssTestInsideCurlyBrackets && ssTestCodeStr[i] == ';')
-                ssTestCodeStr.insert(i + 1, "\n");
-        }
-        
-        //Removing spaces after newlines
-        {
-            bool ssTestLastNewline = false;
+            bool lastStatement = false;
             for(size_t i = 0; i < ssTestCodeStr.size(); ++i)
             {
-                if(ssTestCodeStr[i] == '\n')
-                    ssTestLastNewline = true;
-                else if(ssTestCodeStr[i] == ' ' && ssTestLastNewline)
+                if( ssTestCodeStr[i] == ';' || 
+                    ssTestCodeStr[i] == '(' || 
+                    ssTestCodeStr[i] == '{' ||
+                    ssTestCodeStr[i] == '<' ||
+                    //ssTestCodeStr[i] == ')' || 
+                    ssTestCodeStr[i] == '}' ||
+                    ssTestCodeStr[i] == '>')
+                {
+                    lastStatement = true;
+                }
+                else if(ssTestCodeStr[i] == ' ' && lastStatement)
                     ssTestCodeStr.erase(i--, 1);
                 else
-                    ssTestLastNewline = false;
+                    lastStatement = false;
+            }
+        }
+        
+        //Add newlines for each statement, indent codes in curly brackets
+        std::string currentIndent = "";
+        bool justOutdent = false;
+        for(size_t i = 0; i < ssTestCodeStr.size() - 1; ++i)
+        {
+            switch(ssTestCodeStr[i])
+            {
+                case '{':
+                {
+                    ssTestCodeStr.insert(i, "\n" + currentIndent);
+                    i += 1 + currentIndent.size();
+                    currentIndent += "    ";
+                    ssTestCodeStr.insert(i + 1, "\n" + currentIndent);
+                    justOutdent = false;
+                    break;
+                }
+                case '}':
+                {
+                    if(!justOutdent)
+                    {
+                        currentIndent = currentIndent.substr(0, currentIndent.size() - 4);
+                        ssTestCodeStr.insert(i, "\n" + currentIndent);
+                        i += 1 + currentIndent.size();
+                    }
+                    
+                    //currentIndent = currentIndent.substr(0, currentIndent.size() - 4);
+                    for(size_t j = i + 1; j < ssTestCodeStr.size(); ++j)
+                    {
+                        if(ssTestCodeStr[j] == ' ')
+                            continue;
+                        else if(ssTestCodeStr[j] == '}')
+                        {
+                            currentIndent = currentIndent.substr(0, currentIndent.size() - 4);
+                            justOutdent = true;
+                        }
+                        break;
+                    }
+                    
+                    if(i < ssTestCodeStr.size())
+                        ssTestCodeStr.insert(i + 1, "\n" + currentIndent);
+                    //i += 1 + currentIndent.size();
+                    break;
+                }
+                case ';':
+                {
+                    for(size_t j = i + 1; j < ssTestCodeStr.size(); ++j)
+                    {
+                        if(ssTestCodeStr[j] == ' ')
+                            continue;
+                        else if(ssTestCodeStr[j] == '}')
+                        {
+                            currentIndent = currentIndent.substr(0, currentIndent.size() - 4);
+                            justOutdent = true;
+                        }
+                        break;
+                    }
+                    
+                    ssTestCodeStr.insert(i + 1, "\n" + currentIndent);
+                    break;
+                }
+                case ' ':
+                case '\n':
+                    break;
+                default:
+                    justOutdent = false;
+                    break;
+            }
+        }
+        
+        const size_t MAX_LINE_LENGTH = 35; //Maximum characters per line
+        
+        //Split long line into multiple lines by "&&" or "||"
+        {
+            size_t currentLineLength = 0;
+            bool insideString = false;
+
+            for(size_t i = 0; i < ssTestCodeStr.size(); ++i) 
+            {
+                //Track if we're inside a string literal
+                if(ssTestCodeStr[i] == '"') 
+                    insideString = !insideString;
+
+                //Don't split inside strings
+                if(!insideString && currentLineLength > MAX_LINE_LENGTH * 0.7f)
+                {
+                    if( ssTestCodeStr[i] == '&' && 
+                        i < ssTestCodeStr.size() - 1 && 
+                        ssTestCodeStr[i + 1] == '&')
+                    {
+                        ssTestCodeStr.insert(i + 2, "\n    ");
+                        i += 7;
+                    }
+                    else if(ssTestCodeStr[i] == '|' && 
+                            i < ssTestCodeStr.size() - 1 && 
+                            ssTestCodeStr[i + 1] == '|')
+                    {
+                        ssTestCodeStr.insert(i + 2, "\n    ");
+                        i += 7;
+                    }
+                }
+
+                //Reset line length on existing newlines
+                if(ssTestCodeStr[i] == '\n') 
+                    currentLineLength = 0;
+                else
+                    ++currentLineLength;
             }
         }
         
         //Split long line into multiple lines by '.', "->"
         {
-            const size_t MAX_LINE_LENGTH = 35; //Maximum characters per line
             size_t currentLineLength = 0;
             bool insideString = false;
 
@@ -1551,7 +1656,43 @@ namespace Internal_ssTest
                 //Don't split inside strings
                 if(!insideString && currentLineLength > MAX_LINE_LENGTH)
                 {
-                    if( ssTestCodeStr[i] == '.' ||
+                    bool dotOperator = ssTestCodeStr[i] == '.';
+                    
+                    //Check float representation
+                    if(dotOperator)
+                    {
+                        //If next character is digit or 'f'
+                        bool isNextDigit = false;
+                        for(size_t j = i + 1; j < ssTestCodeStr.size(); ++j)
+                        {
+                            if(ssTestCodeStr[j] == ' ' || ssTestCodeStr[j] == '\t')
+                                continue;
+                            if(isdigit(ssTestCodeStr[j]) != 0 || ssTestCodeStr[j] == 'f')
+                                isNextDigit = true;
+                            break;
+                        }
+                        
+                        bool isFuncOrVar = false;
+                        if(isNextDigit)
+                        {
+                            //If next next character is letter or '(', 
+                            //then we are sure it is not float
+                            for(size_t j = i + 2; j < ssTestCodeStr.size(); ++j)
+                            {
+                                if(ssTestCodeStr[j] == ' ' || ssTestCodeStr[j] == '\t')
+                                    continue;
+                                if(isalpha(ssTestCodeStr[j]) != 0 || ssTestCodeStr[j] == '(')
+                                    isFuncOrVar = true;
+                                break;
+                            }
+                        }
+                        else
+                            isFuncOrVar = true;
+                        
+                        dotOperator = isFuncOrVar;
+                    }
+                    
+                    if( dotOperator ||
                         (
                             ssTestCodeStr[i] == '-' && 
                             i < ssTestCodeStr.size() - 1 && 

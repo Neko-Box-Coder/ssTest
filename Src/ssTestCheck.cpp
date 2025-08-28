@@ -46,14 +46,20 @@ int NestedTestGroup(std::string indentation)
     
     ssTEST("Nested Test")
     {
-        ssTEST_OUTPUT_ASSERT(true);
-        ssTEST_OUTPUT_SKIP_ASSERT(true);
-        ssTEST_OUTPUT_OPTIONAL_ASSERT(true);
+        ssTEST_OUTPUT_ASSERT_TRUE(true);
+        
+        ssTEST_MARK_SKIP_ASSERT_START();
+        ssTEST_OUTPUT_ASSERT_TRUE(true);
+        ssTEST_MARK_SKIP_ASSERT_END();
+        
+        ssTEST_MARK_OPTIONAL_ASSERT_START();
+        ssTEST_OUTPUT_ASSERT_TRUE(true);
+        ssTEST_MARK_OPTIONAL_ASSERT_END();
     };
     
     ssTEST_SKIP("Nested Skip Test")
     {
-        ssTEST_OUTPUT_ASSERT(true);
+        ssTEST_OUTPUT_ASSERT_TRUE(true);
     };
     
     ssTEST_END_TEST_GROUP();
@@ -65,18 +71,18 @@ int ssTestTestGroup_ShouldHaveCorrectFormat_WhenNestedWithOtherTestGroups()
     
     ssTEST("Outer Test")
     {
-        ssTEST_OUTPUT_ASSERT(true);
+        ssTEST_OUTPUT_ASSERT_TRUE(true);
     };
     
     ssTEST("Calling Another Test Group")
     {
-        ssTEST_OUTPUT_ASSERT(true);
-        ssTEST_OUTPUT_ASSERT( NestedTestGroup( ssTEST_GET_NESTED_TEST_GROUP_INDENT() ) == 0 );
+        ssTEST_OUTPUT_ASSERT_TRUE(true);
+        ssTEST_OUTPUT_ASSERT_EQ( NestedTestGroup( ssTEST_GET_NESTED_TEST_GROUP_INDENT() ), 0 );
     };
     
     ssTEST("Outer Test 2")
     {
-        ssTEST_OUTPUT_ASSERT(true);
+        ssTEST_OUTPUT_ASSERT_TRUE(true);
     };
     
     ssTEST_END_TEST_GROUP();
@@ -268,11 +274,10 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
         ssTEST("Test")
         {
             someVar = 1;
-            ssTEST_OUTPUT_ASSERT(someVar == 1);
-            ssTEST_OUTPUT_ASSERT("Test Info", someVar == 1);
-            ssTEST_OUTPUT_ASSERT("", someVar, 1);
-            ssTEST_OUTPUT_ASSERT("", someVar, 1, ==);
-            ssTEST_OUTPUT_ASSERT("", someVar, 1 + 1, <);
+            ssTEST_OUTPUT_ASSERT_TRUE(someVar == 1);
+            ssTEST_OUTPUT_ASSERT_TRUE(someVar == 1, "Test Info");
+            ssTEST_OUTPUT_ASSERT_EQ(someVar, 1, "");
+            ssTEST_OUTPUT_ASSERT_LT(someVar, 1 + 1, "");
         };
         
         ssTEST_END_TEST_GROUP();
@@ -296,11 +301,10 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
         ssTEST("Test Should Fail")
         {
             someVar = 1;
-            ssTEST_OUTPUT_ASSERT(someVar == 0);
-            ssTEST_OUTPUT_ASSERT("Should fail", someVar == 0);
-            ssTEST_OUTPUT_ASSERT("Should fail 2", someVar, 0);
-            ssTEST_OUTPUT_ASSERT("Should fail 3", someVar, 0, ==);
-            ssTEST_OUTPUT_ASSERT("Should fail 4", someVar, 0, <);
+            ssTEST_OUTPUT_ASSERT_TRUE(someVar == 0);
+            ssTEST_OUTPUT_ASSERT_TRUE(someVar == 0, "Should fail");
+            ssTEST_OUTPUT_ASSERT_EQ(someVar, 0, "Should fail 2");
+            ssTEST_OUTPUT_ASSERT_LT(someVar, 0, "Should fail 3");
         };
         
         ssTEST_END_TEST_GROUP();
@@ -324,11 +328,15 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
         ssTEST("Test Should Pass With Optional Failed Asserts")
         {
             someVar = 1;
-            ssTEST_OUTPUT_OPTIONAL_ASSERT(someVar == 0);
-            ssTEST_OUTPUT_OPTIONAL_ASSERT("Should optionally fail", someVar == 0);
-            ssTEST_OUTPUT_OPTIONAL_ASSERT("Should optionally pass", someVar, 1);
-            ssTEST_OUTPUT_OPTIONAL_ASSERT("Should optionally pass", someVar, 1, ==);
-            ssTEST_OUTPUT_OPTIONAL_ASSERT("Should optionally fail", someVar, 0, <);
+            
+            ssTEST_MARK_OPTIONAL_ASSERT_START();
+            
+            ssTEST_OUTPUT_ASSERT_TRUE(someVar == 0);
+            ssTEST_OUTPUT_ASSERT_TRUE(someVar == 0, "Should optionally fail");
+            ssTEST_OUTPUT_ASSERT_EQ(someVar, 1, "Should optionally pass");
+            ssTEST_OUTPUT_ASSERT_LT(someVar, 0, "Should optionally fail");
+            
+            ssTEST_MARK_OPTIONAL_ASSERT_END();
         };
         
         ssTEST_END_TEST_GROUP();
@@ -352,11 +360,14 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
         ssTEST("Test Should Skip All Asserts")
         {
             someVar = 1;
-            ssTEST_OUTPUT_SKIP_ASSERT(someVar == 0);
-            ssTEST_OUTPUT_SKIP_ASSERT("Should Skip", someVar == 0);
-            ssTEST_OUTPUT_SKIP_ASSERT("Should Skip 2", someVar, 0);
-            ssTEST_OUTPUT_SKIP_ASSERT("Should Skip 3", someVar, 0, ==);
-            ssTEST_OUTPUT_SKIP_ASSERT("Should Skip 4", someVar, 0, <);
+            ssTEST_MARK_SKIP_ASSERT_START();
+            
+            ssTEST_OUTPUT_ASSERT_TRUE(someVar == 0);
+            ssTEST_OUTPUT_ASSERT_TRUE(someVar == 0, "Should skip");
+            ssTEST_OUTPUT_ASSERT_EQ(someVar, 0, "Should skip 2");
+            ssTEST_OUTPUT_ASSERT_LT(someVar, 0, "Should skip 3");
+
+            ssTEST_MARK_SKIP_ASSERT_END();
         };
         
         ssTEST_END_TEST_GROUP();
@@ -410,7 +421,7 @@ int ssTestOutputAssert_ShouldAssertCorrectly_WhenAssertingExpression()
             assert(assertSkip(false, indent) == 0);
             assert(outputBuffer.str().find("Assertion Failed (-)") == std::string::npos);
             assert(outputBuffer.str().find("Assertion Skipped (/)") != std::string::npos);
-            assert(outputBuffer.str().find("(Should Skip)") != std::string::npos);
+            assert(outputBuffer.str().find("(Should skip)") != std::string::npos);
             assert(outputBuffer.str().find("(OOO)") != std::string::npos);
         }
         std::cout << outputBuffer.str();
@@ -486,7 +497,7 @@ int ssTestOutputValuesWhenFailed_ShouldOutputValues_WhenFailed()
     {
         someVar = 1;
         
-        ssTEST_OUTPUT_ASSERT("Test", someVar == 2);
+        ssTEST_OUTPUT_ASSERT_TRUE(someVar == 2, "Test");
         ssTEST_OUTPUT_VALUES_WHEN_FAILED(someVar, 2, someVar2, someVar3, someVar4);
     };
     

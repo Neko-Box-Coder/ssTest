@@ -165,8 +165,8 @@ int main(int argc, char** argv)
             testAllocator = MyMemoryAllocator_Create(64, 0);
         );
         
-        ssTEST_OUTPUT_ASSERT(testAllocator.PageSize == 64);
-        ssTEST_OUTPUT_ASSERT(testAllocator.PageCount == 0);
+        ssTEST_OUTPUT_ASSERT_EQ(testAllocator.PageSize, 64);
+        ssTEST_OUTPUT_ASSERT_EQ(testAllocator.PageCount, 0);
     };
     
     ssTEST("MyMemoryAllocator_CreateShared Should Create Shared Memory Allocator")
@@ -186,10 +186,10 @@ int main(int argc, char** argv)
             sharedAllocator = MyMemoryAllocator_CreateShared(sharedMemory, pageSize, pageCount);
         );
         
-        ssTEST_OUTPUT_ASSERT(sharedAllocator.AllocateID_Table == (short*)sharedMemory);
-        ssTEST_OUTPUT_ASSERT(sharedAllocator.Memory == (char*)sharedMemory + pageCount * sizeof(short));
-        ssTEST_OUTPUT_ASSERT(sharedAllocator.PageSize == pageSize);
-        ssTEST_OUTPUT_ASSERT(sharedAllocator.PageCount == pageCount);
+        ssTEST_OUTPUT_ASSERT_EQ(sharedAllocator.AllocateID_Table, (short*)sharedMemory);
+        ssTEST_OUTPUT_ASSERT_EQ(sharedAllocator.Memory, (char*)sharedMemory + pageCount * sizeof(short));
+        ssTEST_OUTPUT_ASSERT_EQ(sharedAllocator.PageSize, pageSize);
+        ssTEST_OUTPUT_ASSERT_EQ(sharedAllocator.PageCount, pageCount);
         
         MyMemoryAllocator_Destroy(&sharedAllocator);
     };
@@ -218,14 +218,13 @@ int main(int argc, char** argv)
         );
         
         //This also works without a message as well
-        ssTEST_OUTPUT_ASSERT("Memory Result", memory != NULL);
+        ssTEST_OUTPUT_ASSERT_NOT_EQ(memory, nullptr, "Memory Result");
         
         //Asserting by passing two values (to compare equality) will also print the values
-        ssTEST_OUTPUT_ASSERT("Reading to beginning of memory", *memory == 17);
+        ssTEST_OUTPUT_ASSERT_EQ(*memory, 17, "Reading to beginning of memory");
         
         //You can also specify the operator to use for comparison
-        ssTEST_OUTPUT_ASSERT(   "Reading to end of memory", 
-                                *(memory + pageSize * pageCount - 1), 17, ==);
+        ssTEST_OUTPUT_ASSERT_EQ(*(memory + pageSize * pageCount - 1), 17, "Reading to end of memory");
     };
     
     ssTEST("MyMemoryAllocator_Allocate Should Return NULL When Not Enough Memory Is Available")
@@ -235,11 +234,15 @@ int main(int argc, char** argv)
             const int pageSize = 64;
         );
         
+        ssTEST_MARK_SKIP_ASSERT_START();
+        
         //Let's say this is not implemented or we know it is crashing, we can skip the assert 
         //or even skip the whole test with ssTEST_SKIP
-        ssTEST_OUTPUT_SKIP_ASSERT(  "Allocation Result", 
-                                    (char*)MyMemoryAllocator_Allocate(  &testAllocator, 
-                                                                        pageSize * 250) == NULL);
+        ssTEST_OUTPUT_ASSERT_EQ((char*)MyMemoryAllocator_Allocate(&testAllocator, pageSize * 250), 
+                                nullptr,
+                                "Allocation Result");
+    
+        ssTEST_MARK_SKIP_ASSERT_END();
     };
     
     ssTEST("MyMemoryAllocator_Allocate Should Return NULL When Zero Size Is Passed In")
@@ -255,9 +258,13 @@ int main(int argc, char** argv)
             memory = (char*)MyMemoryAllocator_Allocate(&testAllocator, 0);
         );
         
+        ssTEST_MARK_OPTIONAL_ASSERT_START();
+        
         //Let's say there's a bug in the allocator which will probably fail the assert, 
         //but we still want to know the result. An optional assert can be used in this case.
-        ssTEST_OUTPUT_OPTIONAL_ASSERT("Allocation Result", memory == NULL);
+        ssTEST_OUTPUT_ASSERT_EQ(memory, nullptr, "Allocation Result");
+        
+        ssTEST_MARK_OPTIONAL_ASSERT_END();
     };
 
     //etc...

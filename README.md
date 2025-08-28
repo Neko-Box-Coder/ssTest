@@ -31,7 +31,7 @@ int main()
     
     ssTEST("testVar Should Be Initialized By Common Setup")
     {
-        ssTEST_OUTPUT_ASSERT(testVar == 1);
+        ssTEST_OUTPUT_ASSERT_TRUE(testVar == 1);
     };
     
     ssTEST("Setup And Execution Example")
@@ -48,7 +48,7 @@ int main()
             testVar = AddOne(testVar2);
         );
         
-        ssTEST_OUTPUT_ASSERT(testVar == testVar2 + 1);
+        ssTEST_OUTPUT_ASSERT_EQ(testVar, testVar2 + 1);
     };
 
     ssTEST_END_TEST_GROUP();
@@ -59,7 +59,7 @@ int main()
 ## 📖 Documentations
 
 ### 😶‍🌫️ Concepts
-In ssTest, **asserts** (`ssTEST_OUTPUT_ASSERT()`) are grouped into **test** (`ssTEST()`), 
+In ssTest, **asserts** (like `ssTEST_OUTPUT_ASSERT_TRUE()` or `ssTEST_OUTPUT_ASSERT_EQ()`) are grouped into **test** (`ssTEST()`), 
 **tests** are grouped into **test group** (`ssTEST_INIT_TEST_GROUP()`).
 
 You can also name each assert, test and test group however you want.
@@ -152,14 +152,14 @@ int main()
     
     ssTEST("A Normal Test")
     {
-        ssTEST_OUTPUT_ASSERT(testVar == 1);
+        ssTEST_OUTPUT_ASSERT_EQ(testVar, 1);
         testVar = 5;
     };
     
     ssTEST("Another Normal Test")
     {
-        ssTEST_OUTPUT_ASSERT(testVar == 1);
-        ssTEST_OUTPUT_ASSERT(cleanUpCount == 1);
+        ssTEST_OUTPUT_ASSERT_EQ(testVar, 1);
+        ssTEST_OUTPUT_ASSERT_EQ(cleanUpCount, 1);
         
         //If ssTEST_DISABLE_COMMON_SETUP_CLEANUP_BETWEEN_TESTS() is called, 
         //  testVar would be 5 and cleanUpCount would be 0
@@ -193,7 +193,7 @@ int AssertGroupA(std::string outerIndent)
     
     ssTEST("A Normal Test In Group A")
     {
-        ssTEST_OUTPUT_ASSERT(true);
+        ssTEST_OUTPUT_ASSERT_TRUE(true);
     };
 
     ssTEST_END_TEST_GROUP();
@@ -204,12 +204,12 @@ int main()
     ssTEST_INIT_TEST_GROUP("Root Test Group");
     ssTEST("A Normal Test")
     {
-        ssTEST_OUTPUT_ASSERT(true);
+        ssTEST_OUTPUT_ASSERT_TRUE(true);
     };
 
     ssTEST("Calling A Nested Test Group")
     {
-        ssTEST_OUTPUT_ASSERT( AssertGroupA( ssTEST_GET_NESTED_TEST_GROUP_INDENT() ) == 0 );
+        ssTEST_OUTPUT_ASSERT_EQ( AssertGroupA( ssTEST_GET_NESTED_TEST_GROUP_INDENT() ), 0 );
     };
 
     ssTEST_END_TEST_GROUP();
@@ -245,17 +245,17 @@ int main()
     
     ssTEST("A Normal Test")
     {
-        ssTEST_OUTPUT_ASSERT(true);
+        ssTEST_OUTPUT_ASSERT_TRUE(true);
     };
     
     ssTEST_ONLY_THIS("Will Only Run This Test")
     {
-        ssTEST_OUTPUT_ASSERT(true);
+        ssTEST_OUTPUT_ASSERT_TRUE(true);
     };
     
     ssTEST_SKIP("Will Skip This Test")
     {
-        ssTEST_OUTPUT_ASSERT(true);
+        ssTEST_OUTPUT_ASSERT_TRUE(true);
     };
     
     ssTEST_END_TEST_GROUP();
@@ -265,23 +265,37 @@ int main()
 ### 👊 Actions And Assertions Inside A Test
 
 #### Required Assertions
-- `ssTEST_OUTPUT_ASSERT(assertionStatement);`: Assert and output the assertion statement.
-- `ssTEST_OUTPUT_ASSERT("info", assertionStatement);`: Assert and output the assertion statement with info.
-- `ssTEST_OUTPUT_ASSERT("info", assertValue, expectedValue);`: Assert if the `assertValue` and `expectedValue` are 
-equal and output result with `info`.
-- `ssTEST_OUTPUT_ASSERT("info", assertValue, expectedValue, operator);`: Assert if the `assertValue` 
-and `expectedValue` returns true when compared with the `operator` and output result with `info`.
+All assertion macros accept an optional `"info"` parameter as the last argument for additional context.
+
+- `ssTEST_OUTPUT_ASSERT_TRUE(expression [, "info"]);`: Assert that the expression evaluates to true.
+- `ssTEST_OUTPUT_ASSERT_EQ(actual, expected [, "info"]);`: Assert that actual equals expected.
+- `ssTEST_OUTPUT_ASSERT_NOT_EQ(actual, expected [, "info"]);`: Assert that actual does not equal expected.
+- `ssTEST_OUTPUT_ASSERT_LT(actual, expected [, "info"]);`: Assert that actual is less than expected.
+- `ssTEST_OUTPUT_ASSERT_LT_EQ(actual, expected [, "info"]);`: Assert that actual is less than or equal to expected.
+- `ssTEST_OUTPUT_ASSERT_GT(actual, expected [, "info"]);`: Assert that actual is greater than expected.
+- `ssTEST_OUTPUT_ASSERT_GT_EQ(actual, expected [, "info"]);`: Assert that actual is greater than or equal to expected.
 
 #### Optional Assertions
-- `ssTEST_OUTPUT_OPTIONAL_ASSERT(...);`: Execute the assertions with arguments same as "Required Assertions"
-but failure of the assertion will **not** fail the test.
+- `ssTEST_MARK_OPTIONAL_ASSERT_START();` and `ssTEST_MARK_OPTIONAL_ASSERT_END();`: Mark the start and end of optional assertions. Any assertion between these markers will **not** fail the test if they fail.
+  ```cpp
+  ssTEST_MARK_OPTIONAL_ASSERT_START();
+  ssTEST_OUTPUT_ASSERT_TRUE(condition);
+  ssTEST_OUTPUT_ASSERT_EQ(value1, value2);
+  ssTEST_MARK_OPTIONAL_ASSERT_END();
+  ```
 
 #### Test Setup and Execution
 - `ssTEST_OUTPUT_SETUP(statement_1; statement_2; ...);`: Executes and output the setup statements.
 - `ssTEST_OUTPUT_EXECUTION(statement_1; statement_2; ...);`: Executes and output the execution statements.
 
 #### Skipping Actions
-- `ssTEST_OUTPUT_SKIP_ASSERT(...)`: **Skips** the assertion with arguments same as "Required Assertions".
+- `ssTEST_MARK_SKIP_ASSERT_START();` and `ssTEST_MARK_SKIP_ASSERT_END();`: Mark the start and end of skipped assertions. Any assertion between these markers will be **skipped**.
+  ```cpp
+  ssTEST_MARK_SKIP_ASSERT_START();
+  ssTEST_OUTPUT_ASSERT_TRUE(condition);
+  ssTEST_OUTPUT_ASSERT_EQ(value1, value2);
+  ssTEST_MARK_SKIP_ASSERT_END();
+  ```
 - `ssTEST_OUTPUT_SKIP_SETUP(statement_1; statement_2; ...);`: **Skips** the test setup action.
 - `ssTEST_OUTPUT_SKIP_EXECUTION(statement_1; statement_2; ...);`: **Skips** the test execution.
 
@@ -346,8 +360,8 @@ int main()
             testAllocator = MyMemoryAllocator_Create(64, 0);
         );
         
-        ssTEST_OUTPUT_ASSERT(testAllocator.PageSize == 64);
-        ssTEST_OUTPUT_ASSERT(testAllocator.PageCount == 0);
+        ssTEST_OUTPUT_ASSERT_EQ(testAllocator.PageSize, 64);
+        ssTEST_OUTPUT_ASSERT_EQ(testAllocator.PageCount, 0);
     };
     
     ssTEST("MyMemoryAllocator_CreateShared Should Create Shared Memory Allocator")
@@ -367,10 +381,10 @@ int main()
             sharedAllocator = MyMemoryAllocator_CreateShared(sharedMemory, pageSize, pageCount);
         );
         
-        ssTEST_OUTPUT_ASSERT(sharedAllocator.AllocateID_Table == (short*)sharedMemory);
-        ssTEST_OUTPUT_ASSERT(sharedAllocator.Memory == (char*)sharedMemory + pageCount * sizeof(short));
-        ssTEST_OUTPUT_ASSERT(sharedAllocator.PageSize == pageSize);
-        ssTEST_OUTPUT_ASSERT(sharedAllocator.PageCount == pageCount);
+        ssTEST_OUTPUT_ASSERT_EQ(sharedAllocator.AllocateID_Table, (short*)sharedMemory);
+        ssTEST_OUTPUT_ASSERT_EQ(sharedAllocator.Memory, (char*)sharedMemory + pageCount * sizeof(short));
+        ssTEST_OUTPUT_ASSERT_EQ(sharedAllocator.PageSize, pageSize);
+        ssTEST_OUTPUT_ASSERT_EQ(sharedAllocator.PageCount, pageCount);
         
         MyMemoryAllocator_Destroy(&sharedAllocator);
     };
@@ -399,14 +413,13 @@ int main()
         );
         
         //This also works without a message as well
-        ssTEST_OUTPUT_ASSERT("Memory Result", memory != NULL);
+        ssTEST_OUTPUT_ASSERT_NOT_EQ(memory, nullptr, "Memory Result");
         
         //Asserting by passing two values (to compare equality) will also print the values
-        ssTEST_OUTPUT_ASSERT("Reading to beginning of memory", *memory == 17);
+        ssTEST_OUTPUT_ASSERT_EQ(*memory, 17, "Reading to beginning of memory");
         
         //You can also specify the operator to use for comparison
-        ssTEST_OUTPUT_ASSERT(   "Reading to end of memory", 
-                                *(memory + pageSize * pageCount - 1), 17, ==);
+        ssTEST_OUTPUT_ASSERT_EQ(*(memory + pageSize * pageCount - 1), 17, "Reading to end of memory");
     };
     
     ssTEST("MyMemoryAllocator_Allocate Should Return NULL When Not Enough Memory Is Available")
@@ -418,9 +431,13 @@ int main()
         
         //Let's say this is not implemented or we know it is crashing, we can skip the assert 
         //or even skip the whole test with ssTEST_SKIP
-        ssTEST_OUTPUT_SKIP_ASSERT(  "Allocation Result", 
-                                    (char*)MyMemoryAllocator_Allocate(  &testAllocator, 
-                                                                        pageSize * 250) == NULL);
+        ssTEST_MARK_SKIP_ASSERT_START();
+        
+        ssTEST_OUTPUT_ASSERT_EQ((char*)MyMemoryAllocator_Allocate(&testAllocator, pageSize * 250),
+                               nullptr,
+                               "Allocation Result");
+        
+        ssTEST_MARK_SKIP_ASSERT_END();
     };
     
     ssTEST("MyMemoryAllocator_Allocate Should Return NULL When Zero Size Is Passed In")
@@ -438,7 +455,11 @@ int main()
         
         //Let's say there's a bug in the allocator which will probably fail the assert, 
         //but we still want to know the result. An optional assert can be used in this case.
-        ssTEST_OUTPUT_OPTIONAL_ASSERT("Allocation Result", memory == NULL);
+        ssTEST_MARK_OPTIONAL_ASSERT_START();
+        
+        ssTEST_OUTPUT_ASSERT_EQ(memory, nullptr, "Allocation Result");
+        
+        ssTEST_MARK_OPTIONAL_ASSERT_END();
     };
 
     //etc...

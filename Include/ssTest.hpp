@@ -1154,6 +1154,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <type_traits>
 
 #define INTERN_INDENTED_COUT std::cout << ssTest_Status.ssTest_Indent
 
@@ -1263,53 +1264,82 @@
         INTERN_INDENTED_COUT << "|" << std::endl; \
     }
 
-#define INTERNAL_ssTEST_OUTPUT_ASSERT_2(info, assertExpression) \
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_TRUE_1(assertExpression) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_TRUE_2(assertExpression, "")
+
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_TRUE_2(assertExpression, info) \
     Internal_ssTest::OutputAssert(  ssTest_Status, \
                                     info, \
                                     __LINE__, \
                                     #assertExpression, \
                                     [&](){return assertExpression;});
 
-#define INTERNAL_ssTEST_OUTPUT_ASSERT_1(assertExpression) \
-    INTERNAL_ssTEST_OUTPUT_ASSERT_2("", assertExpression)
-
-#define INTERNAL_ssTEST_OUTPUT_ASSERT_4(info, assertValue, expectedValue, operator) \
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_OPERATOR(info, assertValue, expectedValue, operator) \
     { \
-        auto ssTestAssertValue = assertValue; \
-        auto ssTestExpectedValue = expectedValue; \
-        \
-        Internal_ssTest::OutputAssertWithOperator(  ssTest_Status, \
-                                                    info, \
-                                                    __LINE__, \
-                                                    ssTestAssertValue, \
-                                                    ssTestExpectedValue, \
-                                                    #assertValue, \
-                                                    #expectedValue, \
-                                                    #operator, \
-                                                    [&](){return ssTestAssertValue operator ssTestExpectedValue;}); \
+        if(ssTest_Status.ssTest_RunningSkip) \
+        { \
+            if(ssTest_Status.ssTest_OutputAsserts) \
+                OutputSkip( ssTest_Status, \
+                            info, \
+                            __LINE__, \
+                            #assertValue " " #operator " " #expectedValue " "); \
+        } \
+        else \
+        { \
+            auto ssTestAssertValue = assertValue; \
+            auto ssTestExpectedValue = expectedValue; \
+            \
+            Internal_ssTest::OutputAssertWithOperator \
+            ( \
+                ssTest_Status, \
+                info, \
+                __LINE__, \
+                ssTestAssertValue, \
+                ssTestExpectedValue, \
+                #assertValue, \
+                #expectedValue, \
+                #operator, \
+                [&](){ return ssTestAssertValue operator ssTestExpectedValue;} \
+            ); \
+        } \
     }
 
-#define INTERNAL_ssTEST_OUTPUT_ASSERT_3(info, assertValue, expectedValue) \
-    INTERNAL_ssTEST_OUTPUT_ASSERT_4(info, assertValue, expectedValue, ==)
 
-#define INTERNAL_ssTEST_OUTPUT_SKIP_2(info, assert) \
-    Internal_ssTest::OutputSkip(ssTest_Status, \
-                                info, \
-                                __LINE__, \
-                                #assert);
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_EQ_2(assertValue, expectedValue) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_EQ_3(assertValue, expectedValue, "")
 
-#define INTERNAL_ssTEST_OUTPUT_SKIP_1(assert) \
-    INTERNAL_ssTEST_OUTPUT_SKIP_2("", assert)
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_EQ_3(assertValue, expectedValue, info) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_OPERATOR(info, assertValue, expectedValue, ==)
 
-#define INTERNAL_ssTEST_OUTPUT_SKIP_3(info, assertValue, expectedValue) \
-    INTERNAL_ssTEST_OUTPUT_SKIP_4(info, assertValue, expectedValue, ==)
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_NOT_EQ_2(assertValue, expectedValue) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_NOT_EQ_3(assertValue, expectedValue, "")
 
-#define INTERNAL_ssTEST_OUTPUT_SKIP_4(info, assertValue, expectedValue, operator) \
-    Internal_ssTest::OutputSkip(ssTest_Status, \
-                                info, \
-                                __LINE__, \
-                                std::string(#assertValue) + " " + std::string(#operator) + " " + \
-                                std::string(#expectedValue));
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_NOT_EQ_3(assertValue, expectedValue, info) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_OPERATOR(info, assertValue, expectedValue, !=)
+
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_GT_2(assertValue, expectedValue) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_GT_3(assertValue, expectedValue, "")
+
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_GT_3(assertValue, expectedValue, info) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_OPERATOR(info, assertValue, expectedValue, >)
+
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_GT_EQ_2(assertValue, expectedValue) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_GT_EQ_3(assertValue, expectedValue, "")
+
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_GT_EQ_3(assertValue, expectedValue, info) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_OPERATOR(info, assertValue, expectedValue, >=)
+
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_LT_2(assertValue, expectedValue) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_LT_3(assertValue, expectedValue, "")
+
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_LT_3(assertValue, expectedValue, info) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_OPERATOR(info, assertValue, expectedValue, <)
+
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_LT_EQ_2(assertValue, expectedValue) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_LT_EQ_3(assertValue, expectedValue, "")
+
+#define INTERNAL_ssTEST_OUTPUT_ASSERT_LT_EQ_3(assertValue, expectedValue, info) \
+    INTERNAL_ssTEST_OUTPUT_ASSERT_OPERATOR(info, assertValue, expectedValue, <=)
 
 namespace Internal_ssTest
 {
@@ -1749,6 +1779,7 @@ namespace Internal_ssTest
         bool ssTest_OutputExecutions = true;
         bool ssTest_OutputAsserts = true;
         bool ssTest_RunningOptional = false;
+        bool ssTest_RunningSkip = false;
         std::function<void()> ssTest_SetUp = [](){};
         std::function<void()> ssTest_CleanUp = [](){};
         std::string ssTest_TestOnly = "";  //Empty means run all tests
@@ -1876,6 +1907,33 @@ namespace Internal_ssTest
         INTERN_INDENTED_COUT << "|" << std::endl;
     }
     
+    inline void OutputSkip( Internal_ssTest::TestStatus& ssTest_Status,
+                            std::string info,
+                            int line,
+                            std::string assertExpression)
+    {
+        if(std::string(info).empty())
+            INTERN_INDENTED_COUT << INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CBLUE << 
+                                    "|---- Assertion Starts: " << INTERN_ssTEST_CEND << std::endl;
+        else
+        {
+            INTERN_INDENTED_COUT << INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CBLUE << 
+                                    "|---- Assertion Starts (" << info << "):" <<
+                                    INTERN_ssTEST_CEND << std::endl;
+        }
+
+        INTERN_INDENTED_COUT <<   "|     Skipping: "; 
+        OutputFormattedCode("", assertExpression, false);
+        
+        std::cout <<    " on line " << line << " in " << ssTest_Status.ssTest_FileName << 
+                        ssTest_Status.ssTest_FileExt << std::endl;
+
+        INTERN_INDENTED_COUT << "|     " << INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CYELLOW << 
+                                "Assertion Skipped (/)" << INTERN_ssTEST_CEND << std::endl;
+
+        INTERN_INDENTED_COUT << "|" << std::endl;
+    }
+    
     inline void OutputAssert(   Internal_ssTest::TestStatus& ssTest_Status,
                                 std::string info,
                                 int line,
@@ -1884,6 +1942,13 @@ namespace Internal_ssTest
     {
         try
         {
+            if(ssTest_Status.ssTest_RunningSkip)
+            {
+                if(ssTest_Status.ssTest_OutputAsserts)
+                    OutputSkip(ssTest_Status, info, line, assertExpression);
+                return;
+            }
+            
             if(ssTest_Status.ssTest_OutputAsserts)
             {
                 INTERNAL_ssTEST_OUTPUT_ASSERT_STARTS(info);
@@ -1917,7 +1982,17 @@ namespace Internal_ssTest
         INTERNAL_ssTEST_OUTPUT_CATCH_ERROR(assertExpression);
     }
     
-    template<typename T, typename U> 
+    template<typename T, typename U>
+    struct IsNonPointerOrVoidPointers
+    {
+        static constexpr bool Value = 
+            (!std::is_pointer<T>::value && !std::is_pointer<U>::value) ||
+            (std::is_same<T, void*>::value && std::is_same<U, void*>::value);
+    };
+    
+    template<   typename T, 
+                typename U, 
+                typename std::enable_if<IsNonPointerOrVoidPointers<T, U>::Value, bool>::type = true>
     inline void OutputAssertWithOperator(   Internal_ssTest::TestStatus& ssTest_Status,
                                             std::string info,
                                             int line,
@@ -1985,31 +2060,31 @@ namespace Internal_ssTest
                                             expectedValuePrint);
     }
     
-    inline void OutputSkip( Internal_ssTest::TestStatus& ssTest_Status,
-                            std::string info,
-                            int line,
-                            std::string assertExpression)
+    template<   typename T, 
+                typename U, 
+                typename std::enable_if<!IsNonPointerOrVoidPointers<T, U>::Value, bool>::type = true>
+    inline void OutputAssertWithOperator(   Internal_ssTest::TestStatus& ssTest_Status,
+                                            std::string info,
+                                            int line,
+                                            const T& assertValue,
+                                            const U& expectedValue,
+                                            std::string assertValuePrint,
+                                            std::string expectedValuePrint,
+                                            std::string operatorValuePrint,
+                                            std::function<bool()> func)
     {
-        if(std::string(info).empty())
-            INTERN_INDENTED_COUT << INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CBLUE << 
-                                    "|---- Assertion Starts: " << INTERN_ssTEST_CEND << std::endl;
-        else
-        {
-            INTERN_INDENTED_COUT << INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CBLUE << 
-                                    "|---- Assertion Starts (" << info << "):" <<
-                                    INTERN_ssTEST_CEND << std::endl;
-        }
-
-        INTERN_INDENTED_COUT <<   "|     Skipping: "; 
-        OutputFormattedCode("", assertExpression, false);
+        void* assertValVoidP = (void*)assertValue;
+        void* expectedValVoidP = (void*)expectedValue;
         
-        std::cout <<    " on line " << line << " in " << ssTest_Status.ssTest_FileName << 
-                        ssTest_Status.ssTest_FileExt << std::endl;
-
-        INTERN_INDENTED_COUT << "|     " << INTERN_ssTEST_CBEGIN << INTERN_ssTEST_CYELLOW << 
-                                "Assertion Skipped (/)" << INTERN_ssTEST_CEND << std::endl;
-
-        INTERN_INDENTED_COUT << "|" << std::endl;
+        return OutputAssertWithOperator(ssTest_Status, 
+                                        info, 
+                                        line, 
+                                        assertValVoidP,
+                                        expectedValVoidP,
+                                        assertValuePrint,
+                                        expectedValuePrint,
+                                        operatorValuePrint,
+                                        func);
     }
     
     #ifdef _WIN32
@@ -2320,28 +2395,55 @@ namespace Internal_ssTest
         INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_VALUES_WHEN_FAILED, __VA_ARGS__ ) \
     } while(0)
 
-#define ssTEST_OUTPUT_ASSERT( ... ) \
+#define ssTEST_OUTPUT_ASSERT_TRUE( ... ) \
     do \
     { \
-        INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT, __VA_ARGS__ ) \
+        INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT_TRUE, __VA_ARGS__ ) \
     } while(0)
 
-#define ssTEST_OUTPUT_OPTIONAL_ASSERT( ... ) \
+#define ssTEST_OUTPUT_ASSERT_EQ( ... ) \
     do \
     { \
-        ssTest_Status.ssTest_RunningOptional = true; \
-        INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT, __VA_ARGS__ ) \
-        ssTest_Status.ssTest_RunningOptional = false; \
+        INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT_EQ, __VA_ARGS__ ) \
     } while(0)
 
-#define ssTEST_OUTPUT_SKIP_ASSERT( ... ) \
+#define ssTEST_OUTPUT_ASSERT_NOT_EQ( ... ) \
     do \
     { \
-        if(ssTest_Status.ssTest_OutputAsserts) \
-        { \
-            INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_SKIP, __VA_ARGS__ ) \
-        } \
+        INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT_NOT_EQ, __VA_ARGS__ ) \
     } while(0)
+
+#define ssTEST_OUTPUT_ASSERT_GT( ... ) \
+    do \
+    { \
+        INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT_GT, __VA_ARGS__ ) \
+    } while(0)
+
+#define ssTEST_OUTPUT_ASSERT_GT_EQ( ... ) \
+    do \
+    { \
+        INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT_GT_EQ, __VA_ARGS__ ) \
+    } while(0)
+
+#define ssTEST_OUTPUT_ASSERT_LT( ... ) \
+    do \
+    { \
+        INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT_LT, __VA_ARGS__ ) \
+    } while(0)
+
+#define ssTEST_OUTPUT_ASSERT_LT_EQ( ... ) \
+    do \
+    { \
+        INTERNAL_ssTEST_VA_SELECT( INTERNAL_ssTEST_OUTPUT_ASSERT_LT_EQ, __VA_ARGS__ ) \
+    } while(0)
+
+#define ssTEST_MARK_OPTIONAL_ASSERT_START() ssTest_Status.ssTest_RunningOptional = true
+
+#define ssTEST_MARK_OPTIONAL_ASSERT_END() ssTest_Status.ssTest_RunningOptional = false
+
+#define ssTEST_MARK_SKIP_ASSERT_START() ssTest_Status.ssTest_RunningSkip = true
+
+#define ssTEST_MARK_SKIP_ASSERT_END() ssTest_Status.ssTest_RunningSkip = false
 
 #define ssTEST_GET_NESTED_TEST_GROUP_INDENT() ssTest_Status.ssTest_Indent + "|     "
 
